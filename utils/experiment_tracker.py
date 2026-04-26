@@ -100,7 +100,7 @@ class ExperimentTracker:
         record_path = self.exp_path / "experiment.json"
         # Make everything JSON serializable
         serializable = self._make_serializable(self.record)
-        with open(record_path, "w") as f:
+        with open(record_path, "w", encoding='utf-8') as f:
             json.dump(serializable, f, indent=2, default=str)
     
     def _make_serializable(self, obj):
@@ -119,7 +119,7 @@ class ExperimentTracker:
     def load_experiment(experiment_path: Path) -> Dict:
         """Load a saved experiment record."""
         record_path = Path(experiment_path) / "experiment.json"
-        with open(record_path) as f:
+        with open(record_path, encoding='utf-8', errors='ignore') as f:
             return json.load(f)
     
     @staticmethod

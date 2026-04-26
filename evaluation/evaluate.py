@@ -423,7 +423,7 @@ def save_all(results_dir: Path,
     pd.DataFrame(csv_rows).to_csv(results_dir / "metrics_summary.csv", index=False)
 
     # ── Classification Report ──────────────────────────────────────────
-    with open(results_dir / "classification_report.txt", "w") as f:
+    with open(results_dir / "classification_report.txt", "w", encoding='utf-8') as f:
         f.write("=" * 60 + "\n")
         f.write("  ADNI Multimodal AI — Final Evaluation Report\n")
         f.write("=" * 60 + "\n\n")

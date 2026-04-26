@@ -267,7 +267,7 @@ elif page == "📊 Results":
         report_path = RESULTS_DIR / "classification_report.txt"
         if report_path.exists():
             st.markdown("### Detailed Classification Report")
-            with open(report_path) as f:
+            with open(report_path, encoding='utf-8', errors='ignore') as f:
                 st.code(f.read(), language="text")
 
 
@@ -447,7 +447,7 @@ elif page == "📋 Experiment History":
         for exp_dir in sorted(EXPERIMENT_DIR.iterdir(), reverse=True):
             if exp_dir.is_dir() and (exp_dir / "experiment.json").exists():
                 try:
-                    with open(exp_dir / "experiment.json") as f:
+                    with open(exp_dir / "experiment.json", encoding='utf-8', errors='ignore') as f:
                         record = json.load(f)
                     experiments.append(record)
                 except Exception:
