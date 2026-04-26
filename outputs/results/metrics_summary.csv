@@ -1,0 +1,8 @@
+Model,Accuracy,F1_Macro,ROC_AUC
+MRI,0.3448,0.1709,0.5
+FDG,0.5172,0.4781,0.637
+Clinical,0.7931,0.7508,0.8118
+Fusion,0.7931,0.7508,0.8684
+drop_MRI,0.7931,0.7508,
+drop_FDG,0.7931,0.7508,
+drop_Clinical,0.3448,0.1709,

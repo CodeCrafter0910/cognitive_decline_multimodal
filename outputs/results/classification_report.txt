@@ -1,0 +1,59 @@
+============================================================
+  ADNI Multimodal AI — Final Evaluation Report
+============================================================
+
+Fusion Model — Test Set
+----------------------------------------
+              precision    recall  f1-score   support
+
+          CN       0.91      1.00      0.95        10
+         MCI       1.00      0.33      0.50         9
+          AD       0.67      1.00      0.80        10
+
+    accuracy                           0.79        29
+   macro avg       0.86      0.78      0.75        29
+weighted avg       0.85      0.79      0.76        29
+
+
+============================================================
+  Per-Class Clinical Metrics
+============================================================
+
+CN:
+  Sensitivity (Recall): 1.000
+  Specificity:          0.947
+  PPV (Precision):      0.909
+  NPV:                  1.000
+  F1-Score:             0.952
+  AUC:                  1.000
+  Support:              10
+
+MCI:
+  Sensitivity (Recall): 0.333
+  Specificity:          1.000
+  PPV (Precision):      1.000
+  NPV:                  0.769
+  F1-Score:             0.500
+  AUC:                  0.700
+  Support:              9
+
+AD:
+  Sensitivity (Recall): 1.000
+  Specificity:          0.737
+  PPV (Precision):      0.667
+  NPV:                  1.000
+  F1-Score:             0.800
+  AUC:                  0.905
+  Support:              10
+
+
+Confidence Intervals (95%):
+  Accuracy: 0.793 [0.655, 0.931]
+  F1-Macro: 0.751 [0.578, 0.904]
+
+============================================================
+  Cross-Validation Results
+============================================================
+  accuracy: 0.731 ± 0.051
+  f1_macro: 0.638 ± 0.094
+  roc_auc: 0.754 ± 0.064
