@@ -73,6 +73,25 @@ def load_patient_clinical_data(csv_path='MMSE_data.csv'):
         print(f"Error loading patient data: {e}")
         return None
 
+def load_patient_diagnosis_data(csv_path='patient_diagnosis.csv'):
+    """
+    Load patient diagnosis data
+    Returns: DataFrame with patient_id, diagnosis
+    """
+    try:
+        from pathlib import Path
+        
+        if not Path(csv_path).exists():
+            csv_path = '../DataSet/patient_diagnosis.csv'
+            if not Path(csv_path).exists():
+                return None
+        
+        df = pd.read_csv(csv_path)
+        return df
+    except Exception as e:
+        print(f"Error loading diagnosis data: {e}")
+        return None
+
 def get_patient_info(patient_id, patient_data_df):
     """
     Get patient clinical information by patient ID
@@ -91,6 +110,21 @@ def get_patient_info(patient_id, patient_data_df):
         'mmse_score': int(patient_row.iloc[0]['mmse_score']),
         'visit_date': patient_row.iloc[0]['visit_date']
     }
+
+def get_patient_diagnosis(patient_id, diagnosis_df):
+    """
+    Get patient diagnosis by patient ID
+    Returns: diagnosis string (CN/MCI/AD) or None
+    """
+    if diagnosis_df is None:
+        return None
+    
+    patient_row = diagnosis_df[diagnosis_df['patient_id'] == patient_id]
+    
+    if len(patient_row) == 0:
+        return None
+    
+    return patient_row.iloc[0]['diagnosis']
 
 def lookup_patient_by_image_id(image_id, mri_csv_path='../mri_full_with_image_id.csv'):
     """
