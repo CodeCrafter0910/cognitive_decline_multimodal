@@ -1,5 +1,5 @@
 """
-ADNI Multimodal AI — Enhanced Dashboard
+ADNI Multimodal AI  Enhanced Dashboard
 
 Features:
 - Overview with system architecture diagram
@@ -27,12 +27,12 @@ sys.path.insert(0, str(Path(__file__).resolve().parent))
 from config import RESULTS_DIR, EXPERIMENT_DIR, LABEL_NAMES
 
 st.set_page_config(
-    page_title="ADNI Multimodal AI — Cognitive Decline Detection",
-    page_icon="🧠",
+    page_title="ADNI Multimodal AI  Cognitive Decline Detection",
+    page_icon="",
     layout="wide"
 )
 
-# ── Custom CSS ──────────────────────────────────────────────────────────
+#  Custom CSS 
 st.markdown("""
 <style>
     .main-title {
@@ -60,7 +60,7 @@ st.markdown("""
 """, unsafe_allow_html=True)
 
 
-# ── Load Results ────────────────────────────────────────────────────────
+#  Load Results 
 metrics_path = RESULTS_DIR / "metrics_summary.csv"
 results_available = metrics_path.exists()
 
@@ -79,24 +79,24 @@ else:
     metrics_df = None
 
 
-# ── Sidebar Navigation ─────────────────────────────────────────────────
-st.sidebar.title("🧠 ADNI Multimodal AI")
+#  Sidebar Navigation 
+st.sidebar.title("ADNI Multimodal AI")
 st.sidebar.markdown("**Multi-Signal Cognitive Decline Detection**")
 st.sidebar.markdown("---")
 
 page = st.sidebar.radio("Navigate", [
-    "🏠 Overview",
-    "🔮 Make Prediction",
-    "📊 Results",
-    "📈 Cross-Validation",
-    "🔍 Confusion Matrix",
-    "📉 ROC Curves",
-    "⚖️ Model Comparison",
-    "🎯 Attention Analysis",
-    "🔬 Per-Class Metrics",
-    "🧪 Ablation Study",
-    "📋 Experiment History",
-    "⚠️ Disclaimer"
+    "Overview",
+    "Make Prediction",
+    "Results",
+    "Cross-Validation",
+    "Confusion Matrix",
+    "ROC Curves",
+    "Model Comparison",
+    "Attention Analysis",
+    "Per-Class Metrics",
+    "Ablation Study",
+    "Experiment History",
+    " Disclaimer"
 ])
 
 st.sidebar.markdown("---")
@@ -106,17 +106,17 @@ st.sidebar.markdown("**Validation:** 5-Fold Stratified CV")
 st.sidebar.markdown("**Fusion:** Attention-Based")
 
 if not results_available:
-    st.sidebar.warning("⚠️ No results found. Run pipeline first!")
+    st.sidebar.warning(" No results found. Run pipeline first!")
 
 
-# ═══════════════════════════════════════════════════════════════════════════
+# 
 #  PAGES
-# ═══════════════════════════════════════════════════════════════════════════
+# 
 
-if page == "🏠 Overview":
+if page == "Overview":
     st.markdown('<div class="main-title">Multi-Signal AI System for Cognitive Decline Detection</div>',
                 unsafe_allow_html=True)
-    st.markdown("### SDP Project — Alzheimer's Disease Classification using Multimodal Learning")
+    st.markdown("### SDP Project  Alzheimer's Disease Classification using Multimodal Learning")
     
     if results_available:
         col1, col2, col3, col4 = st.columns(4)
@@ -125,33 +125,33 @@ if page == "🏠 Overview":
         col3.metric("Fusion ROC-AUC", f"{fusion_auc:.3f}")
         col4.metric("Classes", "CN / MCI / AD")
     else:
-        st.warning("⚠️ Run `python adni_project/run.py` first to generate results.")
+        st.warning(" Run `python adni_project/run.py` first to generate results.")
     
     st.markdown("---")
     
-    # ── Key Improvements ──────────────────────────────────────────
-    st.markdown("### 🚀 Key Technical Improvements")
+    #  Key Improvements 
+    st.markdown("### Key Technical Improvements")
     
     col1, col2 = st.columns(2)
     
     with col1:
         st.markdown("""
         **Architecture Upgrades:**
-        - ✅ True 3D CNN (full brain volume analysis)
-        - ✅ Attention-based multimodal fusion
-        - ✅ Squeeze-and-Excitation blocks
-        - ✅ Residual connections
-        - ✅ Feature selection (Mutual Information)
+        -  True 3D CNN (full brain volume analysis)
+        -  Attention-based multimodal fusion
+        -  Squeeze-and-Excitation blocks
+        -  Residual connections
+        -  Feature selection (Mutual Information)
         """)
     
     with col2:
         st.markdown("""
         **Training Upgrades:**
-        - ✅ 5-fold stratified cross-validation
-        - ✅ Medical data augmentation
-        - ✅ SMOTE class balancing
-        - ✅ Hyperparameter tuning
-        - ✅ Early stopping + LR scheduling
+        -  5-fold stratified cross-validation
+        -  Medical data augmentation
+        -  SMOTE class balancing
+        -  Hyperparameter tuning
+        -  Early stopping + LR scheduling
         """)
     
     col3, col4 = st.columns(2)
@@ -159,59 +159,59 @@ if page == "🏠 Overview":
     with col3:
         st.markdown("""
         **Evaluation Upgrades:**
-        - ✅ Per-class Sensitivity/Specificity
-        - ✅ PPV and NPV metrics
-        - ✅ 95% confidence intervals (bootstrap)
-        - ✅ Uncertainty quantification
+        -  Per-class Sensitivity/Specificity
+        -  PPV and NPV metrics
+        -  95% confidence intervals (bootstrap)
+        -  Uncertainty quantification
         """)
     
     with col4:
         st.markdown("""
         **Interpretability:**
-        - ✅ Grad-CAM brain region visualization
-        - ✅ Attention weight analysis
-        - ✅ Ablation study
-        - ✅ Experiment tracking
+        -  Grad-CAM brain region visualization
+        -  Attention weight analysis
+        -  Ablation study
+        -  Experiment tracking
         """)
     
     st.markdown("---")
     
-    # ── Pipeline Architecture ─────────────────────────────────────
+    #  Pipeline Architecture 
     st.markdown("### System Pipeline Architecture")
     st.code("""
 ADNI Dataset (Fully paired subjects: MRI + FDG-PET + Clinical)
-           │
-     ┌─────┴──────┬──────────────┐
-     │            │              │
+           
+     
+                               
  Structural   FDG PET       MMSCORE
     MRI       Imaging       (Clinical)
-     │            │              │
+                               
  Preprocess   Preprocess     Derive 15
  + 3D CNN     + 3D CNN      Enhanced
  Features     Features      Features
  (256-dim)    (256-dim)     + Severity Bins
-     │            │          + Z-scores
-     │            │              │
-  Feature     Feature          │
-  Selection   Selection        │
-  (MI/PCA)    (MI/PCA)         │
-     │            │              │
+                           + Z-scores
+                               
+  Feature     Feature          
+  Selection   Selection        
+  (MI/PCA)    (MI/PCA)         
+                               
  SVM Ensemble SVM Ensemble  XGBoost
   (3 kernels)  (3 kernels)    + SMOTE
-     │            │              │
+                               
   P(CN|MRI)  P(CN|FDG)   P(CN|Clin)
   P(MCI|MRI) P(MCI|FDG)  P(MCI|Clin)
   P(AD|MRI)  P(AD|FDG)   P(AD|Clin)
-     │            │              │
-     └─────┬──────┴──────────────┘
-           │
-   ┌───────┴────────┐
-   │ Attention-Based │
-   │ Neural Fusion   │
-   │ (Learned Weights│
-   │  per patient)   │
-   └───────┬────────┘
-           │
+                               
+     
+           
+   
+    Attention-Based 
+    Neural Fusion   
+    (Learned Weights
+     per patient)   
+   
+           
     Final Prediction
     CN / MCI / AD
     + Confidence Score
@@ -220,11 +220,11 @@ ADNI Dataset (Fully paired subjects: MRI + FDG-PET + Clinical)
     
     st.markdown("---")
     
-    # ── Modality Details ──────────────────────────────────────────
+    #  Modality Details 
     st.markdown("### Signals Used")
     col1, col2, col3 = st.columns(3)
     with col1:
-        st.markdown("**🧲 Structural MRI**")
+        st.markdown("**Structural MRI**")
         st.markdown("- T1-weighted brain scans")
         st.markdown("- **3D CNN features** (full volume)")
         st.markdown("- 40+ statistical features")
@@ -232,14 +232,14 @@ ADNI Dataset (Fully paired subjects: MRI + FDG-PET + Clinical)
         st.markdown("- Regional asymmetry analysis")
         st.markdown("- Captures brain **atrophy**")
     with col2:
-        st.markdown("**🔬 FDG PET**")
+        st.markdown("**FDG PET**")
         st.markdown("- Metabolic imaging (glucose)")
         st.markdown("- **3D CNN features** (full volume)")
         st.markdown("- 40+ statistical features")
         st.markdown("- Regional metabolism patterns")
         st.markdown("- Captures brain **hypometabolism**")
     with col3:
-        st.markdown("**📋 Clinical (MMSCORE)**")
+        st.markdown("**Clinical (MMSCORE)**")
         st.markdown("- Mini-Mental State Exam")
         st.markdown("- **15 enhanced features**")
         st.markdown("- Severity classification bins")
@@ -248,8 +248,8 @@ ADNI Dataset (Fully paired subjects: MRI + FDG-PET + Clinical)
         st.markdown("- Captures **cognitive decline**")
 
 
-elif page == "🔮 Make Prediction":
-    st.title("🔮 Make Prediction — Cognitive Decline Assessment")
+elif page == "Make Prediction":
+    st.title("Make Prediction  Cognitive Decline Assessment")
     
     st.markdown("""
     ### Clinical Data Prediction
@@ -266,7 +266,7 @@ elif page == "🔮 Make Prediction":
     clinical_model_path = RESULTS_DIR / "models" / "clinical_model.pkl"
     
     if not clinical_model_path.exists():
-        st.error("⚠️ Clinical model not found. Please run the training pipeline first: `python adni_project/run.py`")
+        st.error(" Clinical model not found. Please run the training pipeline first: `python adni_project/run.py`")
     else:
         try:
             import pickle
@@ -277,10 +277,10 @@ elif page == "🔮 Make Prediction":
                 model_dict = pickle.load(f)
                 clinical_model = model_dict['model'] if isinstance(model_dict, dict) else model_dict
             
-            st.success("✅ Clinical model loaded successfully!")
+            st.success(" Clinical model loaded successfully!")
             
             # Create input form
-            st.markdown("### 📝 Patient Information")
+            st.markdown("### Patient Information")
             
             col1, col2 = st.columns(2)
             
@@ -290,7 +290,7 @@ elif page == "🔮 Make Prediction":
                 gender = st.selectbox("Gender", ["Male", "Female"])
                 education = st.number_input("Education (years)", min_value=0, max_value=25, value=16, step=1)
                 
-                st.info("💡 Demographics are for reference only. Prediction is based on MMSE score.")
+                st.info("Demographics are for reference only. Prediction is based on MMSE score.")
             
             with col2:
                 st.markdown("#### Cognitive Assessment (Required)")
@@ -299,18 +299,18 @@ elif page == "🔮 Make Prediction":
                 
                 # Show MMSE interpretation
                 if mmse_score >= 24:
-                    st.info("📊 **Normal cognition** (24-30)")
+                    st.info("**Normal cognition** (24-30)")
                 elif mmse_score >= 18:
-                    st.warning("📊 **Mild cognitive impairment** (18-23)")
+                    st.warning("**Mild cognitive impairment** (18-23)")
                 else:
-                    st.error("📊 **Severe impairment** (<18)")
+                    st.error("**Severe impairment** (<18)")
             
             st.markdown("---")
             
             # Predict button
-            if st.button("🔮 Predict Cognitive Status", type="primary", use_container_width=True):
+            if st.button("Predict Cognitive Status", type="primary", use_container_width=True):
                 
-                with st.spinner("🔄 Analyzing cognitive profile..."):
+                with st.spinner("Analyzing cognitive profile..."):
                     
                     # Generate 15 clinical features from MMSE score
                     features = []
@@ -351,7 +351,7 @@ elif page == "🔮 Make Prediction":
                 
                 # Display results
                 st.markdown("---")
-                st.markdown("## 🎯 Prediction Results")
+                st.markdown("## Prediction Results")
                 
                 # Map prediction to label
                 label_map = {0: "CN", 1: "MCI", 2: "AD"}
@@ -372,7 +372,7 @@ elif page == "🔮 Make Prediction":
                 
                 # Show probabilities
                 if probabilities is not None:
-                    st.markdown("### 📊 Confidence Scores")
+                    st.markdown("### Confidence Scores")
                     
                     col1, col2, col3 = st.columns(3)
                     
@@ -407,7 +407,7 @@ elif page == "🔮 Make Prediction":
                 
                 # Clinical interpretation
                 st.markdown("---")
-                st.markdown("### 📋 Clinical Interpretation")
+                st.markdown("### Clinical Interpretation")
                 
                 if predicted_label == "CN":
                     st.success("""
@@ -438,7 +438,7 @@ elif page == "🔮 Make Prediction":
                 
                 # Feature importance
                 st.markdown("---")
-                st.markdown("### 🔍 Key Features Used")
+                st.markdown("### Key Features Used")
                 
                 st.markdown(f"""
                 - **MMSE Score:** {mmse_score}/30
@@ -451,7 +451,7 @@ elif page == "🔮 Make Prediction":
                 
                 # Patient info summary
                 st.markdown("---")
-                st.markdown("### 👤 Patient Summary")
+                st.markdown("### Patient Summary")
                 st.markdown(f"""
                 - **Age:** {age} years
                 - **Gender:** {gender}
@@ -464,7 +464,7 @@ elif page == "🔮 Make Prediction":
                 # Disclaimer
                 st.markdown("---")
                 st.warning("""
-                ⚠️ **Important Disclaimer:**
+                 **Important Disclaimer:**
                 - This is a **research tool** and NOT a medical diagnostic device
                 - Predictions are based on clinical data only (MMSE score)
                 - Full multimodal system uses MRI + FDG-PET + Clinical data for comprehensive assessment
@@ -473,424 +473,13 @@ elif page == "🔮 Make Prediction":
                 """)
                 
         except Exception as e:
-            st.error(f"❌ Error during prediction: {str(e)}")
+            st.error(f" Error during prediction: {str(e)}")
             import traceback
             st.code(traceback.format_exc())
 
 
-elif page == "📊 Results":
-    st.title("📊 Final Results — Test Set Evaluation")
-    
-    if not results_available:
-        st.error("No results found. Run the pipeline first: `python adni_project/run.py`")
-    else:
-        st.markdown("### Performance Summary")
-        
-        display_df = metrics_df[metrics_df["Model"].isin(["MRI", "FDG", "Clinical", "Fusion"])]
-        st.dataframe(
-            display_df.style.highlight_max(subset=["Accuracy", "ROC_AUC"], color="#c8e6c9"),
-            use_container_width=True
-        )
-    
-    **Three prediction modes available:**
-    1. 🧠 **Full Multimodal** - Upload MRI + FDG-PET scans + Clinical data (Best accuracy: 79.3%)
-    2. 📋 **Clinical Only** - Enter MMSE score only (Quick screening: 79.3%)
-    3. 🔬 **Partial Multimodal** - Any combination of available data
-    """)
-    
-    st.markdown("---")
-    
-    # Check if models exist
-    mri_model_path = RESULTS_DIR / "models" / "mri_model.pkl"
-    fdg_model_path = RESULTS_DIR / "models" / "fdg_model.pkl"
-    clinical_model_path = RESULTS_DIR / "models" / "clinical_model.pkl"
-    fusion_model_path = RESULTS_DIR / "models" / "meta_clf.pkl"
-    
-    models_available = {
-        'MRI': mri_model_path.exists(),
-        'FDG': fdg_model_path.exists(),
-        'Clinical': clinical_model_path.exists(),
-        'Fusion': fusion_model_path.exists()
-    }
-    
-    if not all(models_available.values()):
-        st.error("⚠️ Some models not found. Please run the training pipeline first: `python adni_project/run.py`")
-        st.info(f"Models status: {models_available}")
-    else:
-        st.success("✅ All models loaded successfully!")
-        
-        # Prediction mode selection
-        st.markdown("### 🎯 Select Prediction Mode")
-        prediction_mode = st.radio(
-            "Choose your input type:",
-            ["📋 Clinical Data Only (MMSE Score)", 
-             "🧠 Full Multimodal (MRI + FDG + Clinical)",
-             "🔬 Upload Scans Only (MRI and/or FDG)"],
-            help="Clinical-only is fastest. Full multimodal provides best accuracy."
-        )
-        
-        st.markdown("---")
-        
-        # Initialize variables
-        mri_uploaded = None
-        fdg_uploaded = None
-        mmse_score = None
-        use_mri = False
-        use_fdg = False
-        use_clinical = False
-        
-        # MODE 1: Clinical Only
-        if prediction_mode == "📋 Clinical Data Only (MMSE Score)":
-            st.markdown("### 📝 Enter Clinical Information")
-            
-            col1, col2 = st.columns(2)
-            
-            with col1:
-                st.markdown("#### Patient Demographics")
-                age = st.number_input("Age (years)", min_value=50, max_value=100, value=70, step=1)
-                gender = st.selectbox("Gender", ["Male", "Female"])
-                education = st.number_input("Education (years)", min_value=0, max_value=25, value=16, step=1)
-            
-            with col2:
-                st.markdown("#### Cognitive Assessment")
-                mmse_score = st.slider("MMSE Score", min_value=0, max_value=30, value=25, step=1,
-                                      help="Mini-Mental State Examination score (0-30)")
-                
-                if mmse_score >= 24:
-                    st.info("📊 **Normal cognition** (24-30)")
-                elif mmse_score >= 18:
-                    st.warning("📊 **Mild impairment** (18-23)")
-                else:
-                    st.error("📊 **Severe impairment** (<18)")
-            
-            use_clinical = True
-        
-        # MODE 2: Full Multimodal
-        elif prediction_mode == "🧠 Full Multimodal (MRI + FDG + Clinical)":
-            st.markdown("### 📤 Upload Medical Scans and Clinical Data")
-            
-            col1, col2 = st.columns(2)
-            
-            with col1:
-                st.markdown("#### 🧲 Structural MRI Scan")
-                mri_uploaded = st.file_uploader(
-                    "Upload MRI scan (.nii or .nii.gz)", 
-                    type=['nii', 'gz'],
-                    key='mri_upload',
-                    help="T1-weighted structural MRI scan in NIfTI format"
-                )
-                if mri_uploaded:
-                    st.success(f"✅ MRI uploaded: {mri_uploaded.name}")
-                    use_mri = True
-            
-            with col2:
-                st.markdown("#### 🔬 FDG-PET Scan")
-                fdg_uploaded = st.file_uploader(
-                    "Upload FDG-PET scan (.nii or .nii.gz)", 
-                    type=['nii', 'gz'],
-                    key='fdg_upload',
-                    help="FDG-PET metabolic imaging scan in NIfTI format"
-                )
-                if fdg_uploaded:
-                    st.success(f"✅ FDG-PET uploaded: {fdg_uploaded.name}")
-                    use_fdg = True
-            
-            st.markdown("#### 📋 Clinical Data")
-            mmse_score = st.slider("MMSE Score", min_value=0, max_value=30, value=25, step=1)
-            use_clinical = True
-            
-            if mmse_score >= 24:
-                st.info("📊 Normal cognition (24-30)")
-            elif mmse_score >= 18:
-                st.warning("📊 Mild impairment (18-23)")
-            else:
-                st.error("📊 Severe impairment (<18)")
-        
-        # MODE 3: Scans Only
-        else:  # Upload Scans Only
-            st.markdown("### 📤 Upload Medical Scans")
-            
-            col1, col2 = st.columns(2)
-            
-            with col1:
-                st.markdown("#### 🧲 Structural MRI Scan (Optional)")
-                mri_uploaded = st.file_uploader(
-                    "Upload MRI scan", 
-                    type=['nii', 'gz'],
-                    key='mri_upload2'
-                )
-                if mri_uploaded:
-                    st.success(f"✅ MRI uploaded: {mri_uploaded.name}")
-                    use_mri = True
-            
-            with col2:
-                st.markdown("#### 🔬 FDG-PET Scan (Optional)")
-                fdg_uploaded = st.file_uploader(
-                    "Upload FDG-PET scan", 
-                    type=['nii', 'gz'],
-                    key='fdg_upload2'
-                )
-                if fdg_uploaded:
-                    st.success(f"✅ FDG-PET uploaded: {fdg_uploaded.name}")
-                    use_fdg = True
-            
-            st.info("💡 You can also add clinical data for better accuracy")
-            add_clinical = st.checkbox("Add MMSE Score")
-            if add_clinical:
-                mmse_score = st.slider("MMSE Score", min_value=0, max_value=30, value=25, step=1)
-                use_clinical = True
-        
-        st.markdown("---")
-        
-        # Predict button
-        can_predict = use_clinical or use_mri or use_fdg
-        
-        if not can_predict:
-            st.warning("⚠️ Please provide at least one input (MRI, FDG, or Clinical data)")
-        
-        if st.button("🔮 Predict Cognitive Status", type="primary", use_container_width=True, disabled=not can_predict):
-            
-            try:
-                import pickle
-                import numpy as np
-                import nibabel as nib
-                from io import BytesIO
-                
-                # Load models
-                models = {}
-                if use_mri:
-                    with open(mri_model_path, 'rb') as f:
-                        model_dict = pickle.load(f)
-                        models['mri'] = model_dict['model'] if isinstance(model_dict, dict) else model_dict
-                if use_fdg:
-                    with open(fdg_model_path, 'rb') as f:
-                        model_dict = pickle.load(f)
-                        models['fdg'] = model_dict['model'] if isinstance(model_dict, dict) else model_dict
-                if use_clinical:
-                    with open(clinical_model_path, 'rb') as f:
-                        model_dict = pickle.load(f)
-                        models['clinical'] = model_dict['model'] if isinstance(model_dict, dict) else model_dict
-                if len(models) > 1:
-                    with open(fusion_model_path, 'rb') as f:
-                        model_dict = pickle.load(f)
-                        models['fusion'] = model_dict['model'] if isinstance(model_dict, dict) else model_dict
-                
-                predictions = {}
-                probabilities_dict = {}
-                
-                with st.spinner("🔄 Processing medical data and making predictions..."):
-                    
-                    # Process Clinical Data
-                    if use_clinical and mmse_score is not None:
-                        st.info("📋 Processing clinical data...")
-                        
-                        # Generate 15 clinical features
-                        features = []
-                        features.append(mmse_score)
-                        features.append(mmse_score / 30.0)
-                        severe = 1 if mmse_score < 18 else 0
-                        mild = 1 if 18 <= mmse_score < 24 else 0
-                        normal = 1 if mmse_score >= 24 else 0
-                        features.extend([severe, mild, normal])
-                        features.append(abs(mmse_score - 24))
-                        features.append(abs(mmse_score - 18))
-                        features.append(mmse_score ** 2)
-                        features.append(1.0 / (mmse_score + 1))
-                        z_score = (mmse_score - 25.8) / 3.0
-                        features.append(z_score)
-                        features.append(1.0 / (1.0 + np.exp(-0.3 * (mmse_score - 24))))
-                        features.append(np.exp(-0.1 * (30 - mmse_score)))
-                        features.append(np.log(mmse_score + 1))
-                        percentile = (mmse_score / 30.0) * 100
-                        features.append(percentile)
-                        impairment = max(0, 30 - mmse_score) / 30.0
-                        features.append(impairment)
-                        
-                        X_clinical = np.array(features).reshape(1, -1)
-                        predictions['clinical'] = models['clinical'].predict(X_clinical)[0]
-                        if hasattr(models['clinical'], 'predict_proba'):
-                            probabilities_dict['clinical'] = models['clinical'].predict_proba(X_clinical)[0]
-                    
-                    # Process MRI Scan
-                    if use_mri and mri_uploaded:
-                        st.info("🧲 Processing MRI scan... (This is a demo - using dummy features)")
-                        # In production, you would process the actual scan
-                        # For demo, use dummy features (47 features expected)
-                        X_mri = np.random.randn(1, 30)  # Dummy features for demo
-                        predictions['mri'] = models['mri'].predict(X_mri)[0]
-                        if hasattr(models['mri'], 'predict_proba'):
-                            probabilities_dict['mri'] = models['mri'].predict_proba(X_mri)[0]
-                    
-                    # Process FDG-PET Scan
-                    if use_fdg and fdg_uploaded:
-                        st.info("🔬 Processing FDG-PET scan... (This is a demo - using dummy features)")
-                        # In production, you would process the actual scan
-                        X_fdg = np.random.randn(1, 30)  # Dummy features for demo
-                        predictions['fdg'] = models['fdg'].predict(X_fdg)[0]
-                        if hasattr(models['fdg'], 'predict_proba'):
-                            probabilities_dict['fdg'] = models['fdg'].predict_proba(X_fdg)[0]
-                    
-                    # Fusion Prediction (if multiple modalities)
-                    if len(predictions) > 1 and 'fusion' in models:
-                        st.info("🔗 Fusing multimodal predictions...")
-                        
-                        # Prepare probability tensors for each modality
-                        modality_probas = []
-                        for modality in ['mri', 'fdg', 'clinical']:
-                            if modality in probabilities_dict:
-                                modality_probas.append(probabilities_dict[modality])
-                        
-                        if len(modality_probas) > 0:
-                            import torch
-                            
-                            # Check if fusion model is PyTorch or sklearn
-                            if hasattr(models['fusion'], 'forward'):
-                                # PyTorch model - use forward pass with separate modality inputs
-                                models['fusion'].eval()
-                                with torch.no_grad():
-                                    # Convert each modality's probabilities to tensor
-                                    modality_tensors = [torch.FloatTensor(proba).unsqueeze(0) 
-                                                       for proba in modality_probas]
-                                    
-                                    # Forward pass with separate modality tensors
-                                    output, attn_weights = models['fusion'](*modality_tensors)
-                                    probabilities_dict['fusion'] = torch.softmax(output, dim=1).numpy()[0]
-                                    predictions['fusion'] = np.argmax(probabilities_dict['fusion'])
-                            else:
-                                # Sklearn model - use predict with concatenated features
-                                X_fusion = np.hstack(modality_probas).reshape(1, -1)
-                                predictions['fusion'] = models['fusion'].predict(X_fusion)[0]
-                                if hasattr(models['fusion'], 'predict_proba'):
-                                    probabilities_dict['fusion'] = models['fusion'].predict_proba(X_fusion)[0]
-                
-                # Display Results
-                st.markdown("---")
-                st.markdown("## 🎯 Prediction Results")
-                
-                # Map predictions
-                label_map = {0: "CN", 1: "MCI", 2: "AD"}
-                label_names_full = {
-                    "CN": "Cognitively Normal",
-                    "MCI": "Mild Cognitive Impairment",
-                    "AD": "Alzheimer's Disease"
-                }
-                color_map = {"CN": "green", "MCI": "orange", "AD": "red"}
-                
-                # Show individual modality predictions
-                if len(predictions) > 1:
-                    st.markdown("### 📊 Individual Modality Predictions")
-                    cols = st.columns(len(predictions))
-                    for idx, (modality, pred) in enumerate(predictions.items()):
-                        if modality != 'fusion':
-                            with cols[idx]:
-                                label = label_map[pred]
-                                st.metric(modality.upper(), label, 
-                                         delta=f"{probabilities_dict[modality][pred]:.1%}" if modality in probabilities_dict else "")
-                
-                # Final prediction (fusion if available, otherwise single modality)
-                final_pred_key = 'fusion' if 'fusion' in predictions else list(predictions.keys())[0]
-                final_prediction = predictions[final_pred_key]
-                final_probabilities = probabilities_dict.get(final_pred_key, None)
-                
-                predicted_label = label_map[final_prediction]
-                predicted_name = label_names_full[predicted_label]
-                color = color_map[predicted_label]
-                
-                st.markdown(f"### Final Diagnosis: :{color}[{predicted_label} - {predicted_name}]")
-                
-                if final_pred_key == 'fusion':
-                    st.success("✅ Using **Multimodal Fusion** for maximum accuracy!")
-                
-                # Show probabilities
-                if final_probabilities is not None:
-                    st.markdown("### 📊 Confidence Scores")
-                    
-                    col1, col2, col3 = st.columns(3)
-                    with col1:
-                        st.metric("CN (Normal)", f"{final_probabilities[0]:.1%}")
-                    with col2:
-                        st.metric("MCI (Mild)", f"{final_probabilities[1]:.1%}")
-                    with col3:
-                        st.metric("AD (Alzheimer's)", f"{final_probabilities[2]:.1%}")
-                    
-                    # Probability chart
-                    fig, ax = plt.subplots(figsize=(10, 4))
-                    colors_bar = ['#2ca02c', '#ff7f0e', '#d62728']
-                    classes = ['CN (Normal)', 'MCI (Mild)', 'AD (Alzheimer\'s)']
-                    bars = ax.barh(classes, final_probabilities, 
-                                   color=colors_bar, alpha=0.8, edgecolor='#2c3e50', linewidth=2)
-                    
-                    for bar, prob in zip(bars, final_probabilities):
-                        width = bar.get_width()
-                        ax.text(width + 0.02, bar.get_y() + bar.get_height()/2,
-                               f'{prob:.1%}', ha='left', va='center', fontweight='bold', fontsize=11)
-                    
-                    ax.set_xlabel('Probability', fontsize=12, fontweight='bold')
-                    ax.set_xlim(0, 1.1)
-                    ax.grid(True, axis='x', alpha=0.3, linestyle='--')
-                    ax.set_title('Prediction Confidence', fontsize=13, fontweight='bold', pad=10)
-                    
-                    st.pyplot(fig)
-                    plt.close(fig)
-                
-                # Clinical interpretation
-                st.markdown("---")
-                st.markdown("### 📋 Clinical Interpretation")
-                
-                if predicted_label == "CN":
-                    st.success("""
-                    **Cognitively Normal (CN)**
-                    - No significant cognitive impairment detected
-                    - Continue regular health monitoring
-                    - Maintain healthy lifestyle habits
-                    """)
-                elif predicted_label == "MCI":
-                    st.warning("""
-                    **Mild Cognitive Impairment (MCI)**
-                    - Mild cognitive decline detected
-                    - Regular monitoring recommended
-                    - Consider cognitive interventions
-                    - Consult healthcare provider for comprehensive assessment
-                    """)
-                else:
-                    st.error("""
-                    **Alzheimer's Disease (AD)**
-                    - Significant cognitive impairment detected
-                    - Comprehensive medical evaluation strongly recommended
-                    - Discuss treatment options with neurologist
-                    - Early intervention may help manage symptoms
-                    """)
-                
-                # Modalities used
-                st.markdown("---")
-                st.markdown("### 🔍 Analysis Summary")
-                
-                confidence_text = f"{final_probabilities[final_prediction]:.1%}" if final_probabilities is not None else "N/A"
-                
-                st.markdown(f"""
-                - **Modalities Used:** {', '.join([k.upper() for k in predictions.keys() if k != 'fusion'])}
-                - **Prediction Method:** {'Multimodal Fusion' if 'fusion' in predictions else 'Single Modality'}
-                - **Confidence Level:** {confidence_text}
-                """)
-                
-                # Disclaimer
-                st.markdown("---")
-                st.warning("""
-                ⚠️ **Important Disclaimer:**
-                - This is a **research tool** and NOT a medical diagnostic device
-                - Scan processing in this demo uses simplified features
-                - **Always consult qualified healthcare professionals** for diagnosis
-                - This tool should not replace professional medical advice
-                """)
-                
-            except Exception as e:
-                st.error(f"❌ Error during prediction: {str(e)}")
-                import traceback
-                st.code(traceback.format_exc())
-
-
-elif page == "📊 Results":
-    st.title("📊 Final Results — Test Set Evaluation")
+elif page == "Results":
+    st.title("Final Results  Test Set Evaluation")
     
     if not results_available:
         st.error("No results found. Run the pipeline first: `python adni_project/run.py`")
@@ -913,8 +502,8 @@ elif page == "📊 Results":
                 st.code(f.read(), language="text")
 
 
-elif page == "📈 Cross-Validation":
-    st.title("📈 Cross-Validation Results")
+elif page == "Cross-Validation":
+    st.title("Cross-Validation Results")
     
     img_path = RESULTS_DIR / "cv_results.png"
     if img_path.exists():
@@ -923,18 +512,18 @@ elif page == "📈 Cross-Validation":
 **How to read this:**
 - Each bar represents one fold's performance
 - Red dashed line = mean across all folds
-- Shaded area = ±1 standard deviation
+- Shaded area = 1 standard deviation
 - Lower variance = more robust model
         """)
     else:
         st.info("Cross-validation results will appear after running the pipeline with CV_ENABLED=True")
 
 
-elif page == "🔍 Confusion Matrix":
-    st.title("🔍 Confusion Matrix")
+elif page == "Confusion Matrix":
+    st.title("Confusion Matrix")
     img_path = RESULTS_DIR / "confusion_matrix.png"
     if img_path.exists():
-        st.image(str(img_path), caption="Fusion Model — Test Set", width=600)
+        st.image(str(img_path), caption="Fusion Model  Test Set", width=600)
         st.markdown("""
 **How to read this:**
 - Rows = True class, Columns = Predicted class
@@ -947,11 +536,11 @@ elif page == "🔍 Confusion Matrix":
         st.warning("Run the pipeline first to generate this plot.")
 
 
-elif page == "📉 ROC Curves":
-    st.title("📉 ROC Curves")
+elif page == "ROC Curves":
+    st.title("ROC Curves")
     img_path = RESULTS_DIR / "roc_curves.png"
     if img_path.exists():
-        st.image(str(img_path), caption="ROC Curves — One vs Rest per class", use_column_width=True)
+        st.image(str(img_path), caption="ROC Curves  One vs Rest per class", use_column_width=True)
         st.markdown("""
 **How to read this:**
 - Each curve shows separation ability for one class
@@ -963,8 +552,8 @@ elif page == "📉 ROC Curves":
         st.warning("Run the pipeline first to generate this plot.")
 
 
-elif page == "⚖️ Model Comparison":
-    st.title("⚖️ Model Comparison")
+elif page == "Model Comparison":
+    st.title("Model Comparison")
     img_path = RESULTS_DIR / "model_comparison.png"
     if img_path.exists():
         st.image(str(img_path), caption="Accuracy and ROC-AUC across all models", use_column_width=True)
@@ -976,8 +565,8 @@ elif page == "⚖️ Model Comparison":
         st.dataframe(metrics_df, use_container_width=True)
 
 
-elif page == "🎯 Attention Analysis":
-    st.title("🎯 Attention Weight Analysis")
+elif page == "Attention Analysis":
+    st.title("Attention Weight Analysis")
     
     img_path = RESULTS_DIR / "attention_weights.png"
     if img_path.exists():
@@ -996,7 +585,7 @@ elif page == "🎯 Attention Analysis":
     
     # Grad-CAM section
     st.markdown("---")
-    st.markdown("### 🧠 Grad-CAM Brain Region Analysis")
+    st.markdown("### Grad-CAM Brain Region Analysis")
     
     gradcam_dir = RESULTS_DIR / "gradcam"
     if gradcam_dir.exists():
@@ -1011,8 +600,8 @@ elif page == "🎯 Attention Analysis":
         st.info("Grad-CAM visualizations will appear after running with GRADCAM_ENABLED=True")
 
 
-elif page == "🔬 Per-Class Metrics":
-    st.title("🔬 Per-Class Clinical Metrics")
+elif page == "Per-Class Metrics":
+    st.title("Per-Class Clinical Metrics")
     
     img_path = RESULTS_DIR / "per_class_metrics.png"
     if img_path.exists():
@@ -1032,8 +621,8 @@ elif page == "🔬 Per-Class Metrics":
         st.info("Per-class metrics will appear after running the pipeline.")
 
 
-elif page == "🧪 Ablation Study":
-    st.title("🧪 Ablation Study")
+elif page == "Ablation Study":
+    st.title("Ablation Study")
     st.markdown("""
     The ablation study measures what happens when each modality is removed from the fusion.
     This reveals how much each signal contributes to the final prediction.
@@ -1068,21 +657,21 @@ elif page == "🧪 Ablation Study":
             st.markdown("**Modality Importance (by accuracy drop):**")
             for modality, impact in impacts:
                 if impact > 0.1:
-                    st.markdown(f"- 🔴 **{modality}**: Major impact (Δ = {impact:.3f}) — Critical signal")
+                    st.markdown(f"- **{modality}**: Major impact ( = {impact:.3f})  Critical signal")
                 elif impact > 0.05:
-                    st.markdown(f"- 🟡 **{modality}**: Moderate impact (Δ = {impact:.3f}) — Useful signal")
+                    st.markdown(f"- **{modality}**: Moderate impact ( = {impact:.3f})  Useful signal")
                 elif impact > 0:
-                    st.markdown(f"- 🟢 **{modality}**: Minor impact (Δ = {impact:.3f}) — Supplementary")
+                    st.markdown(f"- **{modality}**: Minor impact ( = {impact:.3f})  Supplementary")
                 else:
-                    st.markdown(f"- ⚪ **{modality}**: No impact (Δ = {impact:.3f})")
+                    st.markdown(f"- **{modality}**: No impact ( = {impact:.3f})")
             
             st.success("**Conclusion:** Multimodal fusion leverages complementary information from all signals.")
         else:
             st.warning("No ablation results found in metrics file.")
 
 
-elif page == "📋 Experiment History":
-    st.title("📋 Experiment History")
+elif page == "Experiment History":
+    st.title("Experiment History")
     
     if EXPERIMENT_DIR.exists():
         experiments = []
@@ -1099,7 +688,7 @@ elif page == "📋 Experiment History":
             st.markdown(f"**Total experiments:** {len(experiments)}")
             
             for exp in experiments[:10]:  # Show last 10
-                with st.expander(f"🔬 {exp.get('experiment_name', 'Unknown')} — "
+                with st.expander(f"{exp.get('experiment_name', 'Unknown')}  "
                                f"{exp.get('status', 'unknown')} "
                                f"({exp.get('duration_seconds', 0):.0f}s)"):
                     
@@ -1128,8 +717,8 @@ elif page == "📋 Experiment History":
         st.info("Experiment directory not found. Run the pipeline first.")
 
 
-elif page == "⚠️ Disclaimer":
-    st.title("⚠️ Important Disclaimers")
+elif page == " Disclaimer":
+    st.title(" Important Disclaimers")
     st.error("""
     **This system is a RESEARCH PROTOTYPE and is NOT for clinical use.**
 
