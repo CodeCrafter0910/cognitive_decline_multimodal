@@ -5,7 +5,7 @@ Upgrades:
 1. Comprehensive clinical metrics: Sensitivity, Specificity, PPV, NPV per class
 2. Confidence intervals via bootstrapping
 3. Statistical significance tests
-4. Enhanced visualizations
+4. Enhanced visualizations with professional styling
 5. Cross-validation result aggregation
 """
 
@@ -25,8 +25,41 @@ from sklearn.metrics import (
 )
 from sklearn.preprocessing import label_binarize
 
+# ── Professional Plotting Style ────────────────────────────────────────
+# Set publication-quality style
+plt.style.use('seaborn-v0_8-darkgrid')
+sns.set_context("paper", font_scale=1.3)
+sns.set_palette("deep")
+
+# Custom matplotlib parameters for professional look
+plt.rcParams.update({
+    'figure.facecolor': 'white',
+    'axes.facecolor': 'white',
+    'axes.edgecolor': '#333333',
+    'axes.linewidth': 1.2,
+    'axes.grid': True,
+    'grid.alpha': 0.3,
+    'grid.linestyle': '--',
+    'grid.linewidth': 0.8,
+    'font.family': 'sans-serif',
+    'font.sans-serif': ['Arial', 'DejaVu Sans', 'Liberation Sans'],
+    'font.size': 11,
+    'axes.labelsize': 12,
+    'axes.titlesize': 13,
+    'axes.titleweight': 'bold',
+    'xtick.labelsize': 10,
+    'ytick.labelsize': 10,
+    'legend.fontsize': 10,
+    'legend.framealpha': 0.9,
+    'legend.edgecolor': '#CCCCCC',
+    'lines.linewidth': 2.5,
+    'lines.markersize': 8,
+    'patch.edgecolor': 'white',
+    'patch.linewidth': 1.5,
+})
+
 LABEL_NAMES = ["CN", "MCI", "AD"]
-COLORS      = ["#2196F3", "#FF9800", "#F44336"]
+COLORS      = ["#1f77b4", "#ff7f0e", "#2ca02c"]  # Professional blue, orange, green
 
 
 # ═══════════════════════════════════════════════════════════════════════════════
@@ -168,7 +201,7 @@ def compute_comprehensive_metrics(y_true: np.ndarray, y_pred: np.ndarray,
 # ═══════════════════════════════════════════════════════════════════════════════
 
 def plot_confusion_matrix(y_true, y_pred, title: str, path: Path):
-    fig, ax = plt.subplots(figsize=(7, 6))
+    fig, ax = plt.subplots(figsize=(8, 7))
     cm = confusion_matrix(y_true, y_pred)
     
     # Percentage-based confusion matrix
@@ -178,45 +211,65 @@ def plot_confusion_matrix(y_true, y_pred, title: str, path: Path):
     annot = np.empty_like(cm, dtype=object)
     for i in range(cm.shape[0]):
         for j in range(cm.shape[1]):
-            annot[i, j] = f"{cm[i, j]}\n({cm_pct[i, j]:.0f}%)"
+            annot[i, j] = f"{cm[i, j]}\n({cm_pct[i, j]:.1f}%)"
     
-    sns.heatmap(cm, annot=annot, fmt='', cmap='Blues',
+    # Professional color scheme
+    sns.heatmap(cm, annot=annot, fmt='', cmap='RdYlGn_r', 
                 xticklabels=LABEL_NAMES, yticklabels=LABEL_NAMES,
-                ax=ax, cbar_kws={'label': 'Count'})
+                ax=ax, cbar_kws={'label': 'Count'}, 
+                linewidths=2, linecolor='white',
+                vmin=0, vmax=cm.max(),
+                annot_kws={'size': 12, 'weight': 'bold'})
     
-    ax.set_xlabel("Predicted Class", fontsize=12)
-    ax.set_ylabel("True Class", fontsize=12)
-    ax.set_title(title, fontweight="bold", fontsize=13)
+    ax.set_xlabel("Predicted Class", fontsize=13, fontweight='bold')
+    ax.set_ylabel("True Class", fontsize=13, fontweight='bold')
+    ax.set_title(title, fontweight="bold", fontsize=14, pad=15)
+    
+    # Add border
+    for spine in ax.spines.values():
+        spine.set_visible(True)
+        spine.set_linewidth(1.5)
+        spine.set_edgecolor('#333333')
+    
     plt.tight_layout()
-    fig.savefig(path, dpi=150, bbox_inches="tight")
+    fig.savefig(path, dpi=300, bbox_inches="tight", facecolor='white')
     plt.close(fig)
 
 
 def plot_roc_curves(y_true, y_proba, title: str, path: Path):
     y_bin   = label_binarize(y_true, classes=[0, 1, 2])
-    fig, ax = plt.subplots(figsize=(8, 6))
+    fig, ax = plt.subplots(figsize=(9, 7))
     
     aucs = []
     for i, (name, color) in enumerate(zip(LABEL_NAMES, COLORS)):
         fpr, tpr, _ = roc_curve(y_bin[:, i], y_proba[:, i])
         roc_auc = auc(fpr, tpr)
         aucs.append(roc_auc)
-        ax.plot(fpr, tpr, color=color, lw=2.5,
-                label=f"{name}  AUC = {roc_auc:.3f}")
+        ax.plot(fpr, tpr, color=color, lw=3,
+                label=f"{name}  (AUC = {roc_auc:.3f})", alpha=0.9)
         
-        # Fill area under curve
-        ax.fill_between(fpr, tpr, alpha=0.1, color=color)
+        # Fill area under curve with gradient effect
+        ax.fill_between(fpr, tpr, alpha=0.15, color=color)
     
-    # Macro average ROC
-    ax.plot([0, 1], [0, 1], "k--", lw=1, label="Random (AUC = 0.500)")
+    # Diagonal reference line
+    ax.plot([0, 1], [0, 1], "k--", lw=2, alpha=0.5, label="Random (AUC = 0.500)")
     
-    ax.set_xlabel("False Positive Rate", fontsize=12)
-    ax.set_ylabel("True Positive Rate", fontsize=12)
-    ax.set_title(f"{title}\nMacro-avg AUC = {np.mean(aucs):.3f}", fontweight="bold", fontsize=13)
-    ax.legend(loc="lower right", fontsize=10)
-    ax.grid(True, alpha=0.3)
+    ax.set_xlabel("False Positive Rate", fontsize=13, fontweight='bold')
+    ax.set_ylabel("True Positive Rate", fontsize=13, fontweight='bold')
+    ax.set_title(f"{title}\nMacro-Average AUC = {np.mean(aucs):.3f}", 
+                 fontweight="bold", fontsize=14, pad=15)
+    ax.legend(loc="lower right", fontsize=11, framealpha=0.95)
+    ax.grid(True, alpha=0.3, linestyle='--')
+    ax.set_xlim([-0.02, 1.02])
+    ax.set_ylim([-0.02, 1.02])
+    
+    # Add border
+    for spine in ax.spines.values():
+        spine.set_visible(True)
+        spine.set_linewidth(1.5)
+    
     plt.tight_layout()
-    fig.savefig(path, dpi=150, bbox_inches="tight")
+    fig.savefig(path, dpi=300, bbox_inches="tight", facecolor='white')
     plt.close(fig)
 
 
@@ -226,27 +279,38 @@ def plot_comparison(metrics_rows: List[Dict], path: Path):
     aucs  = [m["roc_auc"]  for m in metrics_rows]
 
     x   = np.arange(len(names))
-    w   = 0.35
-    fig, ax = plt.subplots(figsize=(10, 6))
+    w   = 0.38
+    fig, ax = plt.subplots(figsize=(11, 7))
     
-    b1  = ax.bar(x - w / 2, accs, w, label="Accuracy", color="#42A5F5", edgecolor='white')
-    b2  = ax.bar(x + w / 2, aucs, w, label="ROC-AUC",  color="#FF7043", edgecolor='white')
+    # Professional color scheme
+    b1  = ax.bar(x - w / 2, accs, w, label="Accuracy", 
+                 color="#3498db", edgecolor='#2c3e50', linewidth=1.5, alpha=0.9)
+    b2  = ax.bar(x + w / 2, aucs, w, label="ROC-AUC",  
+                 color="#e74c3c", edgecolor='#2c3e50', linewidth=1.5, alpha=0.9)
     
+    # Add value labels on bars
     for bar in list(b1) + list(b2):
         h = bar.get_height()
         if not np.isnan(h):
-            ax.text(bar.get_x() + bar.get_width() / 2, h + 0.01,
-                    f"{h:.3f}", ha="center", va="bottom", fontsize=9, fontweight='bold')
+            ax.text(bar.get_x() + bar.get_width() / 2, h + 0.015,
+                    f"{h:.3f}", ha="center", va="bottom", 
+                    fontsize=10, fontweight='bold', color='#2c3e50')
     
     ax.set_xticks(x)
-    ax.set_xticklabels(names, rotation=20, ha="right", fontsize=11)
-    ax.set_ylim(0, 1.15)
-    ax.set_ylabel("Score", fontsize=12)
-    ax.set_title("Model Comparison — Test Set", fontweight="bold", fontsize=14)
-    ax.legend(fontsize=11)
-    ax.grid(True, axis='y', alpha=0.3)
+    ax.set_xticklabels(names, rotation=15, ha="right", fontsize=12, fontweight='bold')
+    ax.set_ylim(0, 1.18)
+    ax.set_ylabel("Score", fontsize=13, fontweight='bold')
+    ax.set_title("Model Comparison — Test Set Performance", 
+                 fontweight="bold", fontsize=14, pad=15)
+    ax.legend(fontsize=12, loc='upper left', framealpha=0.95)
+    ax.grid(True, axis='y', alpha=0.3, linestyle='--')
+    
+    # Add horizontal reference line at 0.33 (random baseline for 3 classes)
+    ax.axhline(y=0.333, color='gray', linestyle=':', lw=2, alpha=0.6, 
+               label='Random Baseline (33.3%)')
+    
     plt.tight_layout()
-    fig.savefig(path, dpi=150, bbox_inches="tight")
+    fig.savefig(path, dpi=300, bbox_inches="tight", facecolor='white')
     plt.close(fig)
 
 
@@ -260,24 +324,31 @@ def plot_per_class_metrics(metrics: Dict, path: Path):
     metric_names = ["sensitivity", "specificity", "ppv", "npv"]
     metric_labels = ["Sensitivity\n(Recall)", "Specificity", "PPV\n(Precision)", "NPV"]
     
-    fig, axes = plt.subplots(1, 4, figsize=(16, 5))
+    fig, axes = plt.subplots(1, 4, figsize=(18, 6))
     
     for idx, (metric_name, metric_label) in enumerate(zip(metric_names, metric_labels)):
         ax = axes[idx]
         values = [per_class[cls][metric_name] for cls in classes]
-        bars = ax.bar(classes, values, color=COLORS, edgecolor='white', width=0.6)
+        bars = ax.bar(classes, values, color=COLORS, edgecolor='#2c3e50', 
+                     width=0.65, linewidth=1.5, alpha=0.9)
         
+        # Add value labels
         for bar, val in zip(bars, values):
-            ax.text(bar.get_x() + bar.get_width() / 2, bar.get_height() + 0.02,
-                    f"{val:.3f}", ha='center', va='bottom', fontsize=10, fontweight='bold')
+            ax.text(bar.get_x() + bar.get_width() / 2, bar.get_height() + 0.025,
+                    f"{val:.3f}", ha='center', va='bottom', 
+                    fontsize=11, fontweight='bold', color='#2c3e50')
         
-        ax.set_ylim(0, 1.15)
-        ax.set_title(metric_label, fontsize=12, fontweight='bold')
-        ax.grid(True, axis='y', alpha=0.3)
+        ax.set_ylim(0, 1.18)
+        ax.set_title(metric_label, fontsize=13, fontweight='bold', pad=10)
+        ax.set_ylabel("Score", fontsize=11, fontweight='bold')
+        ax.grid(True, axis='y', alpha=0.3, linestyle='--')
+        
+        # Add reference line at 0.8 (good performance threshold)
+        ax.axhline(y=0.8, color='green', linestyle=':', lw=2, alpha=0.4)
     
-    fig.suptitle("Per-Class Clinical Metrics", fontsize=14, fontweight='bold')
+    fig.suptitle("Per-Class Clinical Metrics", fontsize=15, fontweight='bold', y=1.02)
     plt.tight_layout()
-    fig.savefig(path, dpi=150, bbox_inches="tight")
+    fig.savefig(path, dpi=300, bbox_inches="tight", facecolor='white')
     plt.close(fig)
 
 
@@ -288,7 +359,7 @@ def plot_attention_weights(attn_weights: np.ndarray, labels: np.ndarray,
         return
     
     modality_names = ["MRI", "FDG", "Clinical"]
-    fig, axes = plt.subplots(1, 3, figsize=(14, 5))
+    fig, axes = plt.subplots(1, 3, figsize=(15, 6))
     
     for cls_idx, cls_name in enumerate(label_names):
         ax = axes[cls_idx]
@@ -298,20 +369,27 @@ def plot_attention_weights(attn_weights: np.ndarray, labels: np.ndarray,
         
         cls_weights = attn_weights[mask]
         bp = ax.boxplot([cls_weights[:, i] for i in range(3)],
-                       labels=modality_names, patch_artist=True)
+                       labels=modality_names, patch_artist=True,
+                       widths=0.6,
+                       boxprops=dict(linewidth=1.5),
+                       whiskerprops=dict(linewidth=1.5),
+                       capprops=dict(linewidth=1.5),
+                       medianprops=dict(linewidth=2.5, color='red'))
         
+        # Color boxes
         for patch, color in zip(bp['boxes'], COLORS):
             patch.set_facecolor(color)
-            patch.set_alpha(0.6)
+            patch.set_alpha(0.7)
+            patch.set_edgecolor('#2c3e50')
         
-        ax.set_title(f"{cls_name} (n={mask.sum()})", fontsize=12, fontweight='bold')
-        ax.set_ylabel("Attention Weight")
-        ax.set_ylim(0, 1)
-        ax.grid(True, axis='y', alpha=0.3)
+        ax.set_title(f"{cls_name} (n={mask.sum()})", fontsize=13, fontweight='bold', pad=10)
+        ax.set_ylabel("Attention Weight", fontsize=12, fontweight='bold')
+        ax.set_ylim(-0.05, 1.05)
+        ax.grid(True, axis='y', alpha=0.3, linestyle='--')
     
-    fig.suptitle("Modality Attention Weights by Class", fontsize=14, fontweight='bold')
+    fig.suptitle("Modality Attention Weights by Class", fontsize=15, fontweight='bold', y=1.00)
     plt.tight_layout()
-    fig.savefig(path, dpi=150, bbox_inches="tight")
+    fig.savefig(path, dpi=300, bbox_inches="tight", facecolor='white')
     plt.close(fig)
 
 
@@ -321,32 +399,50 @@ def plot_cv_results(cv_scores: Dict, path: Path):
         return
     
     metrics_to_plot = ['accuracy', 'f1_macro', 'roc_auc']
-    fig, axes = plt.subplots(1, 3, figsize=(15, 5))
+    metric_labels = ['Accuracy', 'F1-Score (Macro)', 'ROC-AUC']
+    fig, axes = plt.subplots(1, 3, figsize=(16, 6))
     
-    for idx, metric in enumerate(metrics_to_plot):
+    for idx, (metric, label) in enumerate(zip(metrics_to_plot, metric_labels)):
         ax = axes[idx]
         values = cv_scores.get(metric, [])
         if not values:
             continue
         
         folds = range(1, len(values) + 1)
-        ax.bar(folds, values, color='#42A5F5', alpha=0.7, edgecolor='white')
-        ax.axhline(y=np.mean(values), color='red', linestyle='--', lw=2,
-                   label=f"Mean = {np.mean(values):.3f}")
+        bars = ax.bar(folds, values, color='#3498db', alpha=0.8, 
+                     edgecolor='#2c3e50', linewidth=1.5)
+        
+        # Add value labels on bars
+        for bar, val in zip(bars, values):
+            ax.text(bar.get_x() + bar.get_width() / 2, bar.get_height() + 0.005,
+                    f"{val:.3f}", ha='center', va='bottom', 
+                    fontsize=9, fontweight='bold')
+        
+        # Mean line
+        mean_val = np.mean(values)
+        std_val = np.std(values)
+        ax.axhline(y=mean_val, color='red', linestyle='--', lw=2.5,
+                   label=f"Mean = {mean_val:.3f}")
         
         # Fill ± std area
         ax.fill_between([0.5, len(values) + 0.5],
-                       np.mean(values) - np.std(values),
-                       np.mean(values) + np.std(values),
-                       alpha=0.1, color='red')
+                       mean_val - std_val,
+                       mean_val + std_val,
+                       alpha=0.15, color='red', label=f"±1 SD = {std_val:.3f}")
         
-        ax.set_xlabel("Fold")
-        ax.set_ylabel(metric.replace('_', ' ').title())
-        ax.set_title(f"{metric.replace('_', ' ').title()}\n"
-                     f"{np.mean(values):.3f} ± {np.std(values):.3f}",
-                     fontsize=12, fontweight='bold')
-        ax.legend()
-        ax.grid(True, axis='y', alpha=0.3)
+        ax.set_xlabel("Fold", fontsize=12, fontweight='bold')
+        ax.set_ylabel(label, fontsize=12, fontweight='bold')
+        ax.set_title(f"{label}\n{mean_val:.3f} ± {std_val:.3f}",
+                     fontsize=13, fontweight='bold', pad=10)
+        ax.legend(fontsize=10, loc='lower right')
+        ax.grid(True, axis='y', alpha=0.3, linestyle='--')
+        ax.set_ylim(0, 1.1)
+    
+    fig.suptitle("5-Fold Stratified Cross-Validation Results", 
+                 fontsize=15, fontweight='bold', y=1.00)
+    plt.tight_layout()
+    fig.savefig(path, dpi=300, bbox_inches="tight", facecolor='white')
+    plt.close(fig)
     
     fig.suptitle("Cross-Validation Results", fontsize=14, fontweight='bold')
     plt.tight_layout()
