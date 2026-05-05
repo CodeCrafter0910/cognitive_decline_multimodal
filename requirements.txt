@@ -3,6 +3,7 @@ pandas
 scikit-learn
 xgboost
 nibabel
+torch
 matplotlib
 seaborn
 streamlit
