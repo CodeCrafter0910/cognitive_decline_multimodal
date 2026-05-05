@@ -504,10 +504,24 @@ elif page == "🔮 Make Prediction":
                                 proba_stack.append(probabilities_dict[modality])
                         
                         if len(proba_stack) > 0:
+                            import torch
+                            
                             X_fusion = np.hstack(proba_stack).reshape(1, -1)
-                            predictions['fusion'] = models['fusion'].predict(X_fusion)[0]
-                            if hasattr(models['fusion'], 'predict_proba'):
-                                probabilities_dict['fusion'] = models['fusion'].predict_proba(X_fusion)[0]
+                            
+                            # Check if fusion model is PyTorch or sklearn
+                            if hasattr(models['fusion'], 'forward'):
+                                # PyTorch model - use forward pass
+                                models['fusion'].eval()
+                                with torch.no_grad():
+                                    X_tensor = torch.FloatTensor(X_fusion)
+                                    output = models['fusion'](X_tensor)
+                                    probabilities_dict['fusion'] = torch.softmax(output, dim=1).numpy()[0]
+                                    predictions['fusion'] = np.argmax(probabilities_dict['fusion'])
+                            else:
+                                # Sklearn model - use predict
+                                predictions['fusion'] = models['fusion'].predict(X_fusion)[0]
+                                if hasattr(models['fusion'], 'predict_proba'):
+                                    probabilities_dict['fusion'] = models['fusion'].predict_proba(X_fusion)[0]
                 
                 # Display Results
                 st.markdown("---")
