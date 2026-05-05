@@ -424,16 +424,20 @@ elif page == "🔮 Make Prediction":
                 models = {}
                 if use_mri:
                     with open(mri_model_path, 'rb') as f:
-                        models['mri'] = pickle.load(f)
+                        model_dict = pickle.load(f)
+                        models['mri'] = model_dict['model'] if isinstance(model_dict, dict) else model_dict
                 if use_fdg:
                     with open(fdg_model_path, 'rb') as f:
-                        models['fdg'] = pickle.load(f)
+                        model_dict = pickle.load(f)
+                        models['fdg'] = model_dict['model'] if isinstance(model_dict, dict) else model_dict
                 if use_clinical:
                     with open(clinical_model_path, 'rb') as f:
-                        models['clinical'] = pickle.load(f)
+                        model_dict = pickle.load(f)
+                        models['clinical'] = model_dict['model'] if isinstance(model_dict, dict) else model_dict
                 if len(models) > 1:
                     with open(fusion_model_path, 'rb') as f:
-                        models['fusion'] = pickle.load(f)
+                        model_dict = pickle.load(f)
+                        models['fusion'] = model_dict['model'] if isinstance(model_dict, dict) else model_dict
                 
                 predictions = {}
                 probabilities_dict = {}
