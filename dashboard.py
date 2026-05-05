@@ -497,28 +497,32 @@ elif page == "🔮 Make Prediction":
                     # Fusion Prediction (if multiple modalities)
                     if len(predictions) > 1 and 'fusion' in models:
                         st.info("🔗 Fusing multimodal predictions...")
-                        # Stack probabilities for fusion
-                        proba_stack = []
+                        
+                        # Prepare probability tensors for each modality
+                        modality_probas = []
                         for modality in ['mri', 'fdg', 'clinical']:
                             if modality in probabilities_dict:
-                                proba_stack.append(probabilities_dict[modality])
+                                modality_probas.append(probabilities_dict[modality])
                         
-                        if len(proba_stack) > 0:
+                        if len(modality_probas) > 0:
                             import torch
-                            
-                            X_fusion = np.hstack(proba_stack).reshape(1, -1)
                             
                             # Check if fusion model is PyTorch or sklearn
                             if hasattr(models['fusion'], 'forward'):
-                                # PyTorch model - use forward pass
+                                # PyTorch model - use forward pass with separate modality inputs
                                 models['fusion'].eval()
                                 with torch.no_grad():
-                                    X_tensor = torch.FloatTensor(X_fusion)
-                                    output = models['fusion'](X_tensor)
+                                    # Convert each modality's probabilities to tensor
+                                    modality_tensors = [torch.FloatTensor(proba).unsqueeze(0) 
+                                                       for proba in modality_probas]
+                                    
+                                    # Forward pass with separate modality tensors
+                                    output, attn_weights = models['fusion'](*modality_tensors)
                                     probabilities_dict['fusion'] = torch.softmax(output, dim=1).numpy()[0]
                                     predictions['fusion'] = np.argmax(probabilities_dict['fusion'])
                             else:
-                                # Sklearn model - use predict
+                                # Sklearn model - use predict with concatenated features
+                                X_fusion = np.hstack(modality_probas).reshape(1, -1)
                                 predictions['fusion'] = models['fusion'].predict(X_fusion)[0]
                                 if hasattr(models['fusion'], 'predict_proba'):
                                     probabilities_dict['fusion'] = models['fusion'].predict_proba(X_fusion)[0]
