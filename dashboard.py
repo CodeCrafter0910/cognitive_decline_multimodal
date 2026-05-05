@@ -606,10 +606,13 @@ elif page == "🔮 Make Prediction":
                 # Modalities used
                 st.markdown("---")
                 st.markdown("### 🔍 Analysis Summary")
+                
+                confidence_text = f"{final_probabilities[final_prediction]:.1%}" if final_probabilities is not None else "N/A"
+                
                 st.markdown(f"""
                 - **Modalities Used:** {', '.join([k.upper() for k in predictions.keys() if k != 'fusion'])}
                 - **Prediction Method:** {'Multimodal Fusion' if 'fusion' in predictions else 'Single Modality'}
-                - **Confidence Level:** {final_probabilities[final_prediction]:.1%} if final_probabilities else 'N/A'}
+                - **Confidence Level:** {confidence_text}
                 """)
                 
                 # Disclaimer
