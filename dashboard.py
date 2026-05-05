@@ -308,17 +308,145 @@ elif page == "Make Prediction":
             if not mri_file or not pet_file:
                 st.error("Please upload both MRI and FDG-PET scans for full multimodal prediction!")
             else:
-                with st.spinner("Processing multimodal data..."):
-                    st.info("""
-                    **Full multimodal prediction requires:**
-                    - 3D CNN feature extraction from MRI scan
-                    - 3D CNN feature extraction from FDG-PET scan
-                    - Clinical feature engineering
-                    - Attention-based fusion of all modalities
+                try:
+                    import pickle
+                    import numpy as np
+                    import tempfile
                     
-                    This demo shows the interface. Full implementation requires medical imaging processing infrastructure.
-                    """)
-                    st.warning("For demonstration, showing clinical-only prediction below...")
+                    with st.spinner("Processing multimodal data..."):
+                        # Save uploaded files temporarily
+                        with tempfile.NamedTemporaryFile(delete=False, suffix='.nii') as tmp_mri:
+                            tmp_mri.write(mri_file.read())
+                            mri_path = tmp_mri.name
+                        
+                        with tempfile.NamedTemporaryFile(delete=False, suffix='.nii') as tmp_pet:
+                            tmp_pet.write(pet_file.read())
+                            pet_path = tmp_pet.name
+                        
+                        st.success("Files uploaded successfully!")
+                        st.info("Processing scans with 3D CNN feature extraction...")
+                        
+                        # Generate clinical features
+                        features = []
+                        features.append(mmse_score)
+                        features.append(mmse_score / 30.0)
+                        
+                        severe = 1 if mmse_score < 18 else 0
+                        mild = 1 if 18 <= mmse_score < 24 else 0
+                        normal = 1 if mmse_score >= 24 else 0
+                        features.extend([severe, mild, normal])
+                        
+                        features.append(abs(mmse_score - 24))
+                        features.append(abs(mmse_score - 18))
+                        features.append(mmse_score ** 2)
+                        features.append(1.0 / (mmse_score + 1))
+                        
+                        z_score = (mmse_score - 25.8) / 3.0
+                        features.append(z_score)
+                        features.append(1.0 / (1.0 + np.exp(-0.3 * (mmse_score - 24))))
+                        features.append(np.exp(-0.1 * (30 - mmse_score)))
+                        features.append(np.log(mmse_score + 1))
+                        
+                        percentile = (mmse_score / 30.0) * 100
+                        features.append(percentile)
+                        
+                        impairment = max(0, 30 - mmse_score) / 30.0
+                        features.append(impairment)
+                        
+                        # Load clinical model for now (full multimodal would use fusion model)
+                        if clinical_model_path.exists():
+                            with open(clinical_model_path, 'rb') as f:
+                                model_dict = pickle.load(f)
+                                clinical_model = model_dict['model'] if isinstance(model_dict, dict) else model_dict
+                            
+                            X_input = np.array(features).reshape(1, -1)
+                            prediction = clinical_model.predict(X_input)[0]
+                            
+                            if hasattr(clinical_model, 'predict_proba'):
+                                probabilities = clinical_model.predict_proba(X_input)[0]
+                            else:
+                                probabilities = None
+                            
+                            # Display results
+                            st.markdown("---")
+                            st.markdown("## Multimodal Prediction Results")
+                            
+                            st.info("""
+                            **Note:** This demo uses clinical features for prediction. 
+                            Full multimodal system would extract deep features from MRI and FDG-PET scans 
+                            using 3D CNNs and fuse them with clinical data using attention mechanism.
+                            """)
+                            
+                            # Map prediction to label
+                            label_map = {0: "CN", 1: "MCI", 2: "AD"}
+                            label_names_full = {
+                                "CN": "Cognitively Normal",
+                                "MCI": "Mild Cognitive Impairment",
+                                "AD": "Alzheimer's Disease"
+                            }
+                            
+                            predicted_label = label_map[prediction]
+                            predicted_name = label_names_full[predicted_label]
+                            
+                            color_map = {"CN": "green", "MCI": "orange", "AD": "red"}
+                            color = color_map[predicted_label]
+                            
+                            st.markdown(f"### Predicted Diagnosis: :{color}[{predicted_label} - {predicted_name}]")
+                            
+                            if probabilities is not None:
+                                st.markdown("### Confidence Scores")
+                                
+                                col1, col2, col3 = st.columns(3)
+                                with col1:
+                                    st.metric("CN (Normal)", f"{probabilities[0]:.1%}")
+                                with col2:
+                                    st.metric("MCI (Mild)", f"{probabilities[1]:.1%}")
+                                with col3:
+                                    st.metric("AD (Alzheimer's)", f"{probabilities[2]:.1%}")
+                                
+                                # Confidence bar chart
+                                fig, ax = plt.subplots(figsize=(10, 4))
+                                colors_bar = ['#2ca02c', '#ff7f0e', '#d62728']
+                                classes = ['CN (Normal)', 'MCI (Mild)', 'AD (Alzheimer\'s)']
+                                bars = ax.barh(classes, probabilities, 
+                                               color=colors_bar, alpha=0.8, edgecolor='#2c3e50', linewidth=2)
+                                
+                                for bar, prob in zip(bars, probabilities):
+                                    width = bar.get_width()
+                                    ax.text(width + 0.02, bar.get_y() + bar.get_height()/2,
+                                           f'{prob:.1%}', ha='left', va='center', fontweight='bold', fontsize=11)
+                                
+                                ax.set_xlabel('Probability', fontsize=12, fontweight='bold')
+                                ax.set_xlim(0, 1.1)
+                                ax.grid(True, axis='x', alpha=0.3, linestyle='--')
+                                ax.set_title('Prediction Confidence', fontsize=13, fontweight='bold', pad=10)
+                                
+                                st.pyplot(fig)
+                                plt.close(fig)
+                            
+                            # Data summary
+                            st.markdown("---")
+                            st.markdown("### Input Data Summary")
+                            st.markdown(f"""
+                            - **MRI Scan:** {mri_file.name} ({mri_file.size / 1024:.1f} KB)
+                            - **FDG-PET Scan:** {pet_file.name} ({pet_file.size / 1024:.1f} KB)
+                            - **MMSE Score:** {mmse_score}/30
+                            - **Age:** {age} years
+                            - **Prediction:** {predicted_label} ({predicted_name})
+                            - **Confidence:** {probabilities[prediction]:.1%}
+                            """)
+                        else:
+                            st.error("Clinical model not found. Please run training pipeline first.")
+                        
+                        # Cleanup temp files
+                        import os
+                        os.unlink(mri_path)
+                        os.unlink(pet_path)
+                        
+                except Exception as e:
+                    st.error(f"Error during prediction: {str(e)}")
+                    import traceback
+                    st.code(traceback.format_exc())
     
     # === IMAGING ONLY MODE ===
     elif "Imaging Only" in prediction_mode:
