@@ -281,26 +281,69 @@ elif page == "Make Prediction":
     
     # === FULL MULTIMODAL MODE ===
     if "Full Multimodal" in prediction_mode:
-        st.markdown("### Upload Patient Data")
+        st.markdown("### Upload Patient Scans")
+        st.info("Upload MRI and FDG-PET scans from the same patient. The system will automatically extract the patient ID and load clinical data.")
         
-        col1, col2, col3 = st.columns(3)
+        col1, col2 = st.columns(2)
         
         with col1:
             st.markdown("**MRI Scan**")
             mri_file = st.file_uploader("Upload MRI (.nii/.nii.gz)", type=['nii', 'gz'], key="mri")
             if mri_file:
-                st.success(f"Uploaded: {mri_file.name}")
+                st.success(f"Uploaded: {mri_file.name[:50]}...")
         
         with col2:
             st.markdown("**FDG-PET Scan**")
             pet_file = st.file_uploader("Upload FDG-PET (.nii/.nii.gz)", type=['nii', 'gz'], key="pet")
             if pet_file:
-                st.success(f"Uploaded: {pet_file.name}")
+                st.success(f"Uploaded: {pet_file.name[:50]}...")
         
-        with col3:
-            st.markdown("**Clinical Data**")
-            mmse_score = st.number_input("MMSE Score (0-30)", min_value=0, max_value=30, value=25, step=1)
-            age = st.number_input("Age", min_value=50, max_value=100, value=70, step=1)
+        # Auto-extract patient info when both files uploaded
+        if mri_file and pet_file:
+            try:
+                from patient_matcher import validate_patient_match, get_patient_info, load_patient_clinical_data
+                
+                # Validate patient match
+                is_valid, patient_id, error_msg = validate_patient_match(mri_file.name, pet_file.name)
+                
+                if not is_valid:
+                    st.error(f"Patient Mismatch Error: {error_msg}")
+                    patient_info = None
+                else:
+                    st.success(f"Patient ID Detected: **{patient_id}**")
+                    
+                    # Load patient clinical data
+                    patient_data_df = load_patient_clinical_data()
+                    patient_info = get_patient_info(patient_id, patient_data_df)
+                    
+                    if patient_info:
+                        st.markdown("### Auto-Loaded Patient Data")
+                        col1, col2, col3 = st.columns(3)
+                        with col1:
+                            st.metric("Patient ID", patient_id)
+                        with col2:
+                            st.metric("MMSE Score", patient_info['mmse_score'])
+                        with col3:
+                            st.metric("Visit Date", patient_info['visit_date'])
+                        
+                        mmse_score = patient_info['mmse_score']
+                        age = 70  # Default, can be enhanced later
+                    else:
+                        st.warning(f"Patient {patient_id} not found in clinical database. Please enter MMSE score manually.")
+                        mmse_score = st.number_input("MMSE Score (0-30)", min_value=0, max_value=30, value=25, step=1, key="manual_mmse")
+                        age = st.number_input("Age", min_value=50, max_value=100, value=70, step=1, key="manual_age")
+                        patient_info = {'mmse_score': mmse_score}
+                        
+            except Exception as e:
+                st.error(f"Error extracting patient info: {str(e)}")
+                st.info("Please enter clinical data manually:")
+                mmse_score = st.number_input("MMSE Score (0-30)", min_value=0, max_value=30, value=25, step=1, key="fallback_mmse")
+                age = st.number_input("Age", min_value=50, max_value=100, value=70, step=1, key="fallback_age")
+                patient_info = None
+        else:
+            mmse_score = 25
+            age = 70
+            patient_info = None
         
         st.markdown("---")
         
@@ -312,6 +355,13 @@ elif page == "Make Prediction":
                     import pickle
                     import numpy as np
                     import tempfile
+                    from patient_matcher import validate_patient_match
+                    
+                    # Final validation
+                    is_valid, patient_id, error_msg = validate_patient_match(mri_file.name, pet_file.name)
+                    if not is_valid:
+                        st.error(error_msg)
+                        st.stop()
                     
                     with st.spinner("Processing multimodal data..."):
                         # Save uploaded files temporarily
@@ -371,6 +421,9 @@ elif page == "Make Prediction":
                             st.markdown("---")
                             st.markdown("## Multimodal Prediction Results")
                             
+                            # Show patient info
+                            st.success(f"**Patient ID:** {patient_id}")
+                            
                             st.info("""
                             **Note:** This demo uses clinical features for prediction. 
                             Full multimodal system would extract deep features from MRI and FDG-PET scans 
@@ -428,9 +481,10 @@ elif page == "Make Prediction":
                             st.markdown("---")
                             st.markdown("### Input Data Summary")
                             st.markdown(f"""
-                            - **MRI Scan:** {mri_file.name} ({mri_file.size / 1024:.1f} KB)
-                            - **FDG-PET Scan:** {pet_file.name} ({pet_file.size / 1024:.1f} KB)
-                            - **MMSE Score:** {mmse_score}/30
+                            - **Patient ID:** {patient_id}
+                            - **MRI Scan:** {mri_file.name[:60]}... ({mri_file.size / 1024:.1f} KB)
+                            - **FDG-PET Scan:** {pet_file.name[:60]}... ({pet_file.size / 1024:.1f} KB)
+                            - **MMSE Score:** {mmse_score}/30 {'(Auto-loaded)' if patient_info else '(Manual)'}
                             - **Age:** {age} years
                             - **Prediction:** {predicted_label} ({predicted_name})
                             - **Confidence:** {probabilities[prediction]:.1%}
