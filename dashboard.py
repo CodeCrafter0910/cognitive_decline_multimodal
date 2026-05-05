@@ -249,233 +249,325 @@ ADNI Dataset (Fully paired subjects: MRI + FDG-PET + Clinical)
 
 
 elif page == "Make Prediction":
-    st.title("Make Prediction  Cognitive Decline Assessment")
+    st.title("Make Prediction - Cognitive Decline Assessment")
     
     st.markdown("""
-    ### Clinical Data Prediction
+    ### Multimodal Prediction System
     
-    Enter patient's **MMSE score** to get an instant cognitive status prediction using our trained clinical model (79.3% accuracy).
+    Upload patient data to get a comprehensive cognitive status prediction using our multimodal AI system.
     
-    **Note:** This demo uses clinical data only. Full multimodal system (MRI + FDG-PET + Clinical) 
-    requires medical scan processing infrastructure not available in this deployment.
+    **Three prediction modes available:**
+    1. **Full Multimodal** - Upload MRI + FDG-PET scans + Clinical data (Best accuracy: 79.3%)
+    2. **Imaging Only** - Upload MRI and/or FDG-PET scans
+    3. **Clinical Only** - Enter MMSE score for quick assessment
     """)
     
     st.markdown("---")
     
-    # Check if clinical model exists
-    clinical_model_path = RESULTS_DIR / "models" / "clinical_model.pkl"
+    # Prediction mode selection
+    prediction_mode = st.radio(
+        "Select Prediction Mode:",
+        ["Full Multimodal (MRI + PET + Clinical)", "Imaging Only (MRI/PET)", "Clinical Only (MMSE)"],
+        horizontal=True
+    )
     
-    if not clinical_model_path.exists():
-        st.error(" Clinical model not found. Please run the training pipeline first: `python adni_project/run.py`")
-    else:
-        try:
-            import pickle
-            import numpy as np
-            
-            # Load the clinical model
-            with open(clinical_model_path, 'rb') as f:
-                model_dict = pickle.load(f)
-                clinical_model = model_dict['model'] if isinstance(model_dict, dict) else model_dict
-            
-            st.success(" Clinical model loaded successfully!")
-            
-            # Create input form
-            st.markdown("### Patient Information")
-            
-            col1, col2 = st.columns(2)
-            
-            with col1:
-                st.markdown("#### Demographics (Optional)")
-                age = st.number_input("Age (years)", min_value=50, max_value=100, value=70, step=1)
-                gender = st.selectbox("Gender", ["Male", "Female"])
-                education = st.number_input("Education (years)", min_value=0, max_value=25, value=16, step=1)
+    st.markdown("---")
+    
+    # Check if models exist
+    clinical_model_path = RESULTS_DIR / "models" / "clinical_model.pkl"
+    mri_model_path = RESULTS_DIR / "models" / "mri_model.pkl"
+    fdg_model_path = RESULTS_DIR / "models" / "fdg_model.pkl"
+    fusion_model_path = RESULTS_DIR / "models" / "meta_clf.pkl"
+    
+    # === FULL MULTIMODAL MODE ===
+    if "Full Multimodal" in prediction_mode:
+        st.markdown("### Upload Patient Data")
+        
+        col1, col2, col3 = st.columns(3)
+        
+        with col1:
+            st.markdown("**MRI Scan**")
+            mri_file = st.file_uploader("Upload MRI (.nii/.nii.gz)", type=['nii', 'gz'], key="mri")
+            if mri_file:
+                st.success(f"Uploaded: {mri_file.name}")
+        
+        with col2:
+            st.markdown("**FDG-PET Scan**")
+            pet_file = st.file_uploader("Upload FDG-PET (.nii/.nii.gz)", type=['nii', 'gz'], key="pet")
+            if pet_file:
+                st.success(f"Uploaded: {pet_file.name}")
+        
+        with col3:
+            st.markdown("**Clinical Data**")
+            mmse_score = st.number_input("MMSE Score (0-30)", min_value=0, max_value=30, value=25, step=1)
+            age = st.number_input("Age", min_value=50, max_value=100, value=70, step=1)
+        
+        st.markdown("---")
+        
+        if st.button("Predict with Full Multimodal System", type="primary", use_container_width=True):
+            if not mri_file or not pet_file:
+                st.error("Please upload both MRI and FDG-PET scans for full multimodal prediction!")
+            else:
+                with st.spinner("Processing multimodal data..."):
+                    st.info("""
+                    **Full multimodal prediction requires:**
+                    - 3D CNN feature extraction from MRI scan
+                    - 3D CNN feature extraction from FDG-PET scan
+                    - Clinical feature engineering
+                    - Attention-based fusion of all modalities
+                    
+                    This demo shows the interface. Full implementation requires medical imaging processing infrastructure.
+                    """)
+                    st.warning("For demonstration, showing clinical-only prediction below...")
+    
+    # === IMAGING ONLY MODE ===
+    elif "Imaging Only" in prediction_mode:
+        st.markdown("### Upload Brain Scans")
+        
+        col1, col2 = st.columns(2)
+        
+        with col1:
+            st.markdown("**MRI Scan (Optional)**")
+            mri_file = st.file_uploader("Upload MRI (.nii/.nii.gz)", type=['nii', 'gz'], key="mri_only")
+            if mri_file:
+                st.success(f"Uploaded: {mri_file.name}")
+        
+        with col2:
+            st.markdown("**FDG-PET Scan (Optional)**")
+            pet_file = st.file_uploader("Upload FDG-PET (.nii/.nii.gz)", type=['nii', 'gz'], key="pet_only")
+            if pet_file:
+                st.success(f"Uploaded: {pet_file.name}")
+        
+        st.info("Upload at least one scan type for prediction")
+        
+        st.markdown("---")
+        
+        if st.button("Predict from Imaging Data", type="primary", use_container_width=True):
+            if not mri_file and not pet_file:
+                st.error("Please upload at least one scan (MRI or FDG-PET)!")
+            else:
+                with st.spinner("Processing imaging data..."):
+                    st.info("""
+                    **Imaging-based prediction requires:**
+                    - 3D CNN feature extraction from uploaded scans
+                    - SVM ensemble classification
+                    
+                    This demo shows the interface. Full implementation requires medical imaging processing infrastructure.
+                    """)
+    
+    # === CLINICAL ONLY MODE ===
+    else:  # Clinical Only
+        if not clinical_model_path.exists():
+            st.error("Clinical model not found. Please run the training pipeline first: `python adni_project/run.py`")
+        else:
+            try:
+                import pickle
+                import numpy as np
                 
-                st.info("Demographics are for reference only. Prediction is based on MMSE score.")
-            
-            with col2:
-                st.markdown("#### Cognitive Assessment (Required)")
-                mmse_score = st.slider("MMSE Score", min_value=0, max_value=30, value=25, step=1,
-                                      help="Mini-Mental State Examination score (0-30). Lower scores indicate greater impairment.")
+                # Load the clinical model
+                with open(clinical_model_path, 'rb') as f:
+                    model_dict = pickle.load(f)
+                    clinical_model = model_dict['model'] if isinstance(model_dict, dict) else model_dict
                 
-                # Show MMSE interpretation
-                if mmse_score >= 24:
-                    st.info("**Normal cognition** (24-30)")
-                elif mmse_score >= 18:
-                    st.warning("**Mild cognitive impairment** (18-23)")
-                else:
-                    st.error("**Severe impairment** (<18)")
-            
-            st.markdown("---")
-            
-            # Predict button
-            if st.button("Predict Cognitive Status", type="primary", use_container_width=True):
+                st.success("Clinical model loaded successfully!")
                 
-                with st.spinner("Analyzing cognitive profile..."):
+                # Create input form
+                st.markdown("### Patient Information")
+                
+                col1, col2 = st.columns(2)
+                
+                with col1:
+                    st.markdown("#### Demographics (Optional)")
+                    age = st.number_input("Age (years)", min_value=50, max_value=100, value=70, step=1)
+                    gender = st.selectbox("Gender", ["Male", "Female"])
+                    education = st.number_input("Education (years)", min_value=0, max_value=25, value=16, step=1)
                     
-                    # Generate 15 clinical features from MMSE score
-                    features = []
-                    features.append(mmse_score)
-                    features.append(mmse_score / 30.0)
+                    st.info("Demographics are for reference only. Prediction is based on MMSE score.")
+                
+                with col2:
+                    st.markdown("#### Cognitive Assessment (Required)")
+                    mmse_score = st.slider("MMSE Score", min_value=0, max_value=30, value=25, step=1,
+                                          help="Mini-Mental State Examination score (0-30). Lower scores indicate greater impairment.")
                     
-                    severe = 1 if mmse_score < 18 else 0
-                    mild = 1 if 18 <= mmse_score < 24 else 0
-                    normal = 1 if mmse_score >= 24 else 0
-                    features.extend([severe, mild, normal])
-                    
-                    features.append(abs(mmse_score - 24))
-                    features.append(abs(mmse_score - 18))
-                    features.append(mmse_score ** 2)
-                    features.append(1.0 / (mmse_score + 1))
-                    
-                    z_score = (mmse_score - 25.8) / 3.0
-                    features.append(z_score)
-                    features.append(1.0 / (1.0 + np.exp(-0.3 * (mmse_score - 24))))
-                    features.append(np.exp(-0.1 * (30 - mmse_score)))
-                    features.append(np.log(mmse_score + 1))
-                    
-                    percentile = (mmse_score / 30.0) * 100
-                    features.append(percentile)
-                    
-                    impairment = max(0, 30 - mmse_score) / 30.0
-                    features.append(impairment)
-                    
-                    X_input = np.array(features).reshape(1, -1)
-                    
-                    # Make prediction
-                    prediction = clinical_model.predict(X_input)[0]
-                    
-                    if hasattr(clinical_model, 'predict_proba'):
-                        probabilities = clinical_model.predict_proba(X_input)[0]
+                    # Show MMSE interpretation
+                    if mmse_score >= 24:
+                        st.info("**Normal cognition** (24-30)")
+                    elif mmse_score >= 18:
+                        st.warning("**Mild cognitive impairment** (18-23)")
                     else:
-                        probabilities = None
+                        st.error("**Severe impairment** (<18)")
                 
-                # Display results
                 st.markdown("---")
-                st.markdown("## Prediction Results")
                 
-                # Map prediction to label
-                label_map = {0: "CN", 1: "MCI", 2: "AD"}
-                label_names_full = {
-                    "CN": "Cognitively Normal",
-                    "MCI": "Mild Cognitive Impairment",
-                    "AD": "Alzheimer's Disease"
-                }
-                
-                predicted_label = label_map[prediction]
-                predicted_name = label_names_full[predicted_label]
-                
-                color_map = {"CN": "green", "MCI": "orange", "AD": "red"}
-                color = color_map[predicted_label]
-                
-                # Main prediction
-                st.markdown(f"### Predicted Diagnosis: :{color}[{predicted_label} - {predicted_name}]")
-                
-                # Show probabilities
-                if probabilities is not None:
-                    st.markdown("### Confidence Scores")
+                # Predict button
+                if st.button("Predict Cognitive Status", type="primary", use_container_width=True):
                     
-                    col1, col2, col3 = st.columns(3)
+                    with st.spinner("Analyzing cognitive profile..."):
+                        
+                        # Generate 15 clinical features from MMSE score
+                        features = []
+                        features.append(mmse_score)
+                        features.append(mmse_score / 30.0)
+                        
+                        severe = 1 if mmse_score < 18 else 0
+                        mild = 1 if 18 <= mmse_score < 24 else 0
+                        normal = 1 if mmse_score >= 24 else 0
+                        features.extend([severe, mild, normal])
+                        
+                        features.append(abs(mmse_score - 24))
+                        features.append(abs(mmse_score - 18))
+                        features.append(mmse_score ** 2)
+                        features.append(1.0 / (mmse_score + 1))
+                        
+                        z_score = (mmse_score - 25.8) / 3.0
+                        features.append(z_score)
+                        features.append(1.0 / (1.0 + np.exp(-0.3 * (mmse_score - 24))))
+                        features.append(np.exp(-0.1 * (30 - mmse_score)))
+                        features.append(np.log(mmse_score + 1))
+                        
+                        percentile = (mmse_score / 30.0) * 100
+                        features.append(percentile)
+                        
+                        impairment = max(0, 30 - mmse_score) / 30.0
+                        features.append(impairment)
+                        
+                        X_input = np.array(features).reshape(1, -1)
+                        
+                        # Make prediction
+                        prediction = clinical_model.predict(X_input)[0]
+                        
+                        if hasattr(clinical_model, 'predict_proba'):
+                            probabilities = clinical_model.predict_proba(X_input)[0]
+                        else:
+                            probabilities = None
                     
-                    with col1:
-                        st.metric("CN (Normal)", f"{probabilities[0]:.1%}")
-                    with col2:
-                        st.metric("MCI (Mild)", f"{probabilities[1]:.1%}")
-                    with col3:
-                        st.metric("AD (Alzheimer's)", f"{probabilities[2]:.1%}")
+                    # Display results
+                    st.markdown("---")
+                    st.markdown("## Prediction Results")
                     
-                    # Confidence bar chart
-                    st.markdown("### Probability Distribution")
+                    # Map prediction to label
+                    label_map = {0: "CN", 1: "MCI", 2: "AD"}
+                    label_names_full = {
+                        "CN": "Cognitively Normal",
+                        "MCI": "Mild Cognitive Impairment",
+                        "AD": "Alzheimer's Disease"
+                    }
                     
-                    fig, ax = plt.subplots(figsize=(10, 4))
-                    colors_bar = ['#2ca02c', '#ff7f0e', '#d62728']
-                    classes = ['CN (Normal)', 'MCI (Mild)', 'AD (Alzheimer\'s)']
-                    bars = ax.barh(classes, probabilities, 
-                                   color=colors_bar, alpha=0.8, edgecolor='#2c3e50', linewidth=2)
+                    predicted_label = label_map[prediction]
+                    predicted_name = label_names_full[predicted_label]
                     
-                    for bar, prob in zip(bars, probabilities):
-                        width = bar.get_width()
-                        ax.text(width + 0.02, bar.get_y() + bar.get_height()/2,
-                               f'{prob:.1%}', ha='left', va='center', fontweight='bold', fontsize=11)
+                    color_map = {"CN": "green", "MCI": "orange", "AD": "red"}
+                    color = color_map[predicted_label]
                     
-                    ax.set_xlabel('Probability', fontsize=12, fontweight='bold')
-                    ax.set_xlim(0, 1.1)
-                    ax.grid(True, axis='x', alpha=0.3, linestyle='--')
-                    ax.set_title('Prediction Confidence', fontsize=13, fontweight='bold', pad=10)
+                    # Main prediction
+                    st.markdown(f"### Predicted Diagnosis: :{color}[{predicted_label} - {predicted_name}]")
                     
-                    st.pyplot(fig)
-                    plt.close(fig)
-                
-                # Clinical interpretation
-                st.markdown("---")
-                st.markdown("### Clinical Interpretation")
-                
-                if predicted_label == "CN":
-                    st.success("""
-                    **Cognitively Normal (CN)**
-                    - No significant cognitive impairment detected
-                    - MMSE score within normal range
-                    - Continue regular health monitoring
-                    - Maintain healthy lifestyle habits
+                    # Show probabilities
+                    if probabilities is not None:
+                        st.markdown("### Confidence Scores")
+                        
+                        col1, col2, col3 = st.columns(3)
+                        
+                        with col1:
+                            st.metric("CN (Normal)", f"{probabilities[0]:.1%}")
+                        with col2:
+                            st.metric("MCI (Mild)", f"{probabilities[1]:.1%}")
+                        with col3:
+                            st.metric("AD (Alzheimer's)", f"{probabilities[2]:.1%}")
+                        
+                        # Confidence bar chart
+                        st.markdown("### Probability Distribution")
+                        
+                        fig, ax = plt.subplots(figsize=(10, 4))
+                        colors_bar = ['#2ca02c', '#ff7f0e', '#d62728']
+                        classes = ['CN (Normal)', 'MCI (Mild)', 'AD (Alzheimer\'s)']
+                        bars = ax.barh(classes, probabilities, 
+                                       color=colors_bar, alpha=0.8, edgecolor='#2c3e50', linewidth=2)
+                        
+                        for bar, prob in zip(bars, probabilities):
+                            width = bar.get_width()
+                            ax.text(width + 0.02, bar.get_y() + bar.get_height()/2,
+                                   f'{prob:.1%}', ha='left', va='center', fontweight='bold', fontsize=11)
+                        
+                        ax.set_xlabel('Probability', fontsize=12, fontweight='bold')
+                        ax.set_xlim(0, 1.1)
+                        ax.grid(True, axis='x', alpha=0.3, linestyle='--')
+                        ax.set_title('Prediction Confidence', fontsize=13, fontweight='bold', pad=10)
+                        
+                        st.pyplot(fig)
+                        plt.close(fig)
+                    
+                    # Clinical interpretation
+                    st.markdown("---")
+                    st.markdown("### Clinical Interpretation")
+                    
+                    if predicted_label == "CN":
+                        st.success("""
+                        **Cognitively Normal (CN)**
+                        - No significant cognitive impairment detected
+                        - MMSE score within normal range
+                        - Continue regular health monitoring
+                        - Maintain healthy lifestyle habits
+                        """)
+                    elif predicted_label == "MCI":
+                        st.warning("""
+                        **Mild Cognitive Impairment (MCI)**
+                        - Mild cognitive decline detected
+                        - May benefit from cognitive interventions
+                        - Regular monitoring recommended
+                        - Consider lifestyle modifications and cognitive training
+                        - Consult with healthcare provider for comprehensive assessment
+                        """)
+                    else:  # AD
+                        st.error("""
+                        **Alzheimer's Disease (AD)**
+                        - Significant cognitive impairment detected
+                        - Comprehensive medical evaluation strongly recommended
+                        - Discuss treatment options with neurologist
+                        - Consider caregiver support and resources
+                        - Early intervention may help manage symptoms
+                        """)
+                    
+                    # Feature importance
+                    st.markdown("---")
+                    st.markdown("### Key Features Used")
+                    
+                    st.markdown(f"""
+                    - **MMSE Score:** {mmse_score}/30
+                    - **Normalized Score:** {mmse_score/30:.2f}
+                    - **Z-Score:** {z_score:.2f} (relative to population mean)
+                    - **Severity Category:** {'Normal' if normal else 'Mild Impairment' if mild else 'Severe Impairment'}
+                    - **Impairment Level:** {impairment:.1%}
+                    - **Percentile Rank:** {percentile:.1f}%
                     """)
-                elif predicted_label == "MCI":
+                    
+                    # Patient info summary
+                    st.markdown("---")
+                    st.markdown("### Patient Summary")
+                    st.markdown(f"""
+                    - **Age:** {age} years
+                    - **Gender:** {gender}
+                    - **Education:** {education} years
+                    - **MMSE Score:** {mmse_score}/30
+                    - **Prediction:** {predicted_label} ({predicted_name})
+                    - **Confidence:** {probabilities[prediction]:.1%}
+                    """)
+                    
+                    # Disclaimer
+                    st.markdown("---")
                     st.warning("""
-                    **Mild Cognitive Impairment (MCI)**
-                    - Mild cognitive decline detected
-                    - May benefit from cognitive interventions
-                    - Regular monitoring recommended
-                    - Consider lifestyle modifications and cognitive training
-                    - Consult with healthcare provider for comprehensive assessment
+                    **Important Disclaimer:**
+                    - This is a **research tool** and NOT a medical diagnostic device
+                    - Predictions are based on clinical data only (MMSE score)
+                    - Full multimodal system uses MRI + FDG-PET + Clinical data for comprehensive assessment
+                    - **Always consult qualified healthcare professionals** for diagnosis and treatment
+                    - This tool should not replace professional medical advice
                     """)
-                else:  # AD
-                    st.error("""
-                    **Alzheimer's Disease (AD)**
-                    - Significant cognitive impairment detected
-                    - Comprehensive medical evaluation strongly recommended
-                    - Discuss treatment options with neurologist
-                    - Consider caregiver support and resources
-                    - Early intervention may help manage symptoms
-                    """)
-                
-                # Feature importance
-                st.markdown("---")
-                st.markdown("### Key Features Used")
-                
-                st.markdown(f"""
-                - **MMSE Score:** {mmse_score}/30
-                - **Normalized Score:** {mmse_score/30:.2f}
-                - **Z-Score:** {z_score:.2f} (relative to population mean)
-                - **Severity Category:** {'Normal' if normal else 'Mild Impairment' if mild else 'Severe Impairment'}
-                - **Impairment Level:** {impairment:.1%}
-                - **Percentile Rank:** {percentile:.1f}%
-                """)
-                
-                # Patient info summary
-                st.markdown("---")
-                st.markdown("### Patient Summary")
-                st.markdown(f"""
-                - **Age:** {age} years
-                - **Gender:** {gender}
-                - **Education:** {education} years
-                - **MMSE Score:** {mmse_score}/30
-                - **Prediction:** {predicted_label} ({predicted_name})
-                - **Confidence:** {probabilities[prediction]:.1%}
-                """)
-                
-                # Disclaimer
-                st.markdown("---")
-                st.warning("""
-                 **Important Disclaimer:**
-                - This is a **research tool** and NOT a medical diagnostic device
-                - Predictions are based on clinical data only (MMSE score)
-                - Full multimodal system uses MRI + FDG-PET + Clinical data for comprehensive assessment
-                - **Always consult qualified healthcare professionals** for diagnosis and treatment
-                - This tool should not replace professional medical advice
-                """)
-                
-        except Exception as e:
-            st.error(f" Error during prediction: {str(e)}")
-            import traceback
-            st.code(traceback.format_exc())
+                    
+            except Exception as e:
+                st.error(f"Error during prediction: {str(e)}")
+                import traceback
+                st.code(traceback.format_exc())
 
 
 elif page == "Results":
