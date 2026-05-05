@@ -484,8 +484,13 @@ elif page == "📊 Results":
     if not results_available:
         st.error("No results found. Run the pipeline first: `python adni_project/run.py`")
     else:
-    
-    This tool uses the **complete multimodal system** (MRI + FDG-PET + Clinical) for maximum accuracy (79.3%).
+        st.markdown("### Performance Summary")
+        
+        display_df = metrics_df[metrics_df["Model"].isin(["MRI", "FDG", "Clinical", "Fusion"])]
+        st.dataframe(
+            display_df.style.highlight_max(subset=["Accuracy", "ROC_AUC"], color="#c8e6c9"),
+            use_container_width=True
+        )
     
     **Three prediction modes available:**
     1. 🧠 **Full Multimodal** - Upload MRI + FDG-PET scans + Clinical data (Best accuracy: 79.3%)
