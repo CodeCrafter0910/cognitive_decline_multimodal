@@ -323,16 +323,20 @@ elif page == "Make Prediction":
                 try:
                     from patient_matcher import validate_patient_match, get_patient_info, load_patient_clinical_data
                     
-                    # Validate patient match
-                    is_valid, patient_id, error_msg = validate_patient_match(mri_file.name, pet_file.name)
+                    # Validate patient match (uses OR logic)
+                    is_valid, patient_id, info_msg = validate_patient_match(mri_file.name, pet_file.name)
                     
                     if not is_valid:
-                        st.error(f"{error_msg}")
+                        st.error(f"{info_msg}")
                         st.info("Tip: Check the 'Use manual entry' box above if your files don't have patient IDs in the filename.")
                         patient_info = None
                         patient_id = None
                     else:
-                        st.success(f"Patient ID Detected: **{patient_id}**")
+                        # Show info message if using OR logic
+                        if info_msg:
+                            st.info(f"ℹ️ {info_msg}")
+                        else:
+                            st.success(f"✅ Patient ID Detected: **{patient_id}**")
                         
                         # Load patient clinical data
                         patient_data_df = load_patient_clinical_data()

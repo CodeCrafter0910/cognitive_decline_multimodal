@@ -115,6 +115,7 @@ def lookup_patient_by_image_id(image_id, mri_csv_path='../mri_full_with_image_id
 def validate_patient_match(mri_filename, fdg_filename):
     """
     Validate that MRI and FDG scans are from the same patient
+    Uses OR logic: if patient ID found in either file, use that for both
     Returns: (is_valid, patient_id, error_message)
     """
     mri_patient_id = extract_patient_id(mri_filename)
@@ -126,20 +127,33 @@ def validate_patient_match(mri_filename, fdg_filename):
         looked_up_id = lookup_patient_by_image_id(image_id)
         if looked_up_id:
             mri_patient_id = looked_up_id
+        else:
+            mri_patient_id = None  # Couldn't resolve image ID
     
     if fdg_patient_id and fdg_patient_id.startswith("IMAGE_"):
         image_id = int(fdg_patient_id.replace("IMAGE_", ""))
         looked_up_id = lookup_patient_by_image_id(image_id)
         if looked_up_id:
             fdg_patient_id = looked_up_id
+        else:
+            fdg_patient_id = None  # Couldn't resolve image ID
     
-    if mri_patient_id is None:
-        return False, None, f"Could not extract patient ID from MRI filename. Please rename file to include patient ID (e.g., ADNI_005_S_0222_MR_...)"
+    # OR logic: if either file has patient ID, use it
+    if mri_patient_id and not fdg_patient_id:
+        # MRI has ID, FDG doesn't - use MRI's ID for both
+        return True, mri_patient_id, f"Using patient ID from MRI: {mri_patient_id}"
     
-    if fdg_patient_id is None:
-        return False, None, f"Could not extract patient ID from FDG filename. Please rename file to include patient ID (e.g., ADNI_005_S_0222_PT_...)"
+    if fdg_patient_id and not mri_patient_id:
+        # FDG has ID, MRI doesn't - use FDG's ID for both
+        return True, fdg_patient_id, f"Using patient ID from FDG: {fdg_patient_id}"
     
+    if not mri_patient_id and not fdg_patient_id:
+        # Neither has ID
+        return False, None, "Could not extract patient ID from either file. Please use manual entry or rename files to include patient ID (e.g., ADNI_005_S_0222_...)"
+    
+    # Both have IDs - check if they match
     if mri_patient_id != fdg_patient_id:
         return False, None, f"Patient ID mismatch! MRI: {mri_patient_id}, FDG: {fdg_patient_id}. Please upload scans from the same patient."
     
+    # Both have same ID
     return True, mri_patient_id, None
