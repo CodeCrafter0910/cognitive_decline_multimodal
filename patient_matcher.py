@@ -10,18 +10,34 @@ def extract_patient_id(filename):
     Extract patient ID from ADNI filename
     Examples:
     - ADNI_005_S_0222_MR_... -> 005_S_0222
-    - I26325_Coreg._Avg,Standardized_Image_and_Voxel_Size_20061003123403-196150 -> Extract from metadata
+    - ADNI_005_S_0222_PT_... -> 005_S_0222
+    - 005_S_0222_... -> 005_S_0222
     """
-    # Pattern 1: ADNI_XXX_S_XXXX format
+    # Pattern 1: ADNI_XXX_S_XXXX format (works for both MR and PT)
+    match = re.search(r'ADNI[_-](\d{3}_S_\d{4})', filename, re.IGNORECASE)
+    if match:
+        return match.group(1)
+    
+    # Pattern 2: Just XXX_S_XXXX format anywhere in filename
     match = re.search(r'(\d{3}_S_\d{4})', filename)
     if match:
         return match.group(1)
     
-    # Pattern 2: Try to extract from other formats
-    match = re.search(r'ADNI[_-]?(\d{3}[_-]S[_-]\d{4})', filename, re.IGNORECASE)
+    # Pattern 3: Extract Image ID (I followed by digits)
+    match = re.search(r'I(\d{5,6})', filename)
     if match:
-        return match.group(1).replace('-', '_')
+        return f"IMAGE_{match.group(1)}"  # Return as IMAGE_XXXXX for lookup
     
+    return None
+
+def extract_image_id(filename):
+    """
+    Extract Image ID from filename
+    Example: I26325_... -> 26325
+    """
+    match = re.search(r'I(\d{5,6})', filename)
+    if match:
+        return int(match.group(1))
     return None
 
 def load_patient_clinical_data(csv_path='MMSE_data.csv'):
@@ -76,6 +92,26 @@ def get_patient_info(patient_id, patient_data_df):
         'visit_date': patient_row.iloc[0]['visit_date']
     }
 
+def lookup_patient_by_image_id(image_id, mri_csv_path='../mri_full_with_image_id.csv'):
+    """
+    Lookup patient ID using Image ID from MRI metadata CSV
+    Returns: patient_id or None
+    """
+    try:
+        from pathlib import Path
+        if not Path(mri_csv_path).exists():
+            return None
+            
+        df = pd.read_csv(mri_csv_path)
+        match = df[df['Image ID'] == image_id]
+        
+        if len(match) > 0:
+            return match.iloc[0]['Subject ID']
+        return None
+    except Exception as e:
+        print(f"Error looking up image ID: {e}")
+        return None
+
 def validate_patient_match(mri_filename, fdg_filename):
     """
     Validate that MRI and FDG scans are from the same patient
@@ -84,13 +120,26 @@ def validate_patient_match(mri_filename, fdg_filename):
     mri_patient_id = extract_patient_id(mri_filename)
     fdg_patient_id = extract_patient_id(fdg_filename)
     
+    # Try image ID lookup if patient ID not found
+    if mri_patient_id and mri_patient_id.startswith("IMAGE_"):
+        image_id = int(mri_patient_id.replace("IMAGE_", ""))
+        looked_up_id = lookup_patient_by_image_id(image_id)
+        if looked_up_id:
+            mri_patient_id = looked_up_id
+    
+    if fdg_patient_id and fdg_patient_id.startswith("IMAGE_"):
+        image_id = int(fdg_patient_id.replace("IMAGE_", ""))
+        looked_up_id = lookup_patient_by_image_id(image_id)
+        if looked_up_id:
+            fdg_patient_id = looked_up_id
+    
     if mri_patient_id is None:
-        return False, None, f"Could not extract patient ID from MRI filename: {mri_filename}"
+        return False, None, f"Could not extract patient ID from MRI filename. Please rename file to include patient ID (e.g., ADNI_005_S_0222_MR_...)"
     
     if fdg_patient_id is None:
-        return False, None, f"Could not extract patient ID from FDG filename: {fdg_filename}"
+        return False, None, f"Could not extract patient ID from FDG filename. Please rename file to include patient ID (e.g., ADNI_005_S_0222_PT_...)"
     
     if mri_patient_id != fdg_patient_id:
-        return False, None, f"Patient ID mismatch! MRI: {mri_patient_id}, FDG: {fdg_patient_id}"
+        return False, None, f"Patient ID mismatch! MRI: {mri_patient_id}, FDG: {fdg_patient_id}. Please upload scans from the same patient."
     
     return True, mri_patient_id, None
