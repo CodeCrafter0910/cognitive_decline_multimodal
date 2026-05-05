@@ -24,12 +24,18 @@ def extract_patient_id(filename):
     
     return None
 
-def load_patient_clinical_data(csv_path='../DataSet/MMSE_18Feb2026.csv'):
+def load_patient_clinical_data(csv_path='MMSE_data.csv'):
     """
     Load patient clinical data from MMSE CSV
     Returns: DataFrame with patient_id, mmse_score, visit_date
     """
     try:
+        # Try local path first, then fallback to parent directory
+        from pathlib import Path
+        
+        if not Path(csv_path).exists():
+            csv_path = '../DataSet/MMSE_18Feb2026.csv'
+        
         df = pd.read_csv(csv_path)
         
         # Get baseline (screening) visit for each patient
