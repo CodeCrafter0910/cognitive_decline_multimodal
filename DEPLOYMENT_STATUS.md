@@ -1,7 +1,7 @@
 # 🚀 Deployment Status - ADNI Multimodal AI
 
 ## ✅ Live Deployment
-- **URL:** https://memorylens.streamlit.app
+- **URL:** https://cognitivedeclinemultimodal-0910.streamlit.app
 - **Status:** ✅ LIVE & WORKING
 - **Platform:** Streamlit Community Cloud
 - **Last Updated:** May 5, 2026

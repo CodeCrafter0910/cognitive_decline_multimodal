@@ -108,12 +108,18 @@ MC_DROPOUT_N_FORWARD = 30          # Number of forward passes for MC Dropout
 LOG_LEVEL  = "INFO"
 LOG_FORMAT = "%(asctime)s [%(levelname)s] %(name)s: %(message)s"
 
-# Print configuration on import
-print(f"Configuration loaded:")
-print(f"  ADNI_ROOT:   {ADNI_ROOT}")
-print(f"  CSV_PATH:    {CSV_PATH}")
-print(f"  OUTPUT_ROOT: {OUTPUT_ROOT}")
-print(f"  Features:    Enhanced Stats (47-dim) - domain-specific features")
-print(f"  SMOTE:       {'Enabled' if CLASS_WEIGHT_METHOD == 'smote' else 'Disabled'}")
-print(f"  Cross-Val:   {CV_N_SPLITS}-fold" if CV_ENABLED else "  Cross-Val:   Disabled")
-print(f"  Fusion:      {FUSION_TYPE}")
+# Print configuration on import (only in non-Streamlit environments)
+if __name__ != "__main__":
+    try:
+        import streamlit
+        # Running in Streamlit - skip verbose output
+    except ImportError:
+        # Not in Streamlit - show config
+        print(f"Configuration loaded:")
+        print(f"  ADNI_ROOT:   {ADNI_ROOT}")
+        print(f"  CSV_PATH:    {CSV_PATH}")
+        print(f"  OUTPUT_ROOT: {OUTPUT_ROOT}")
+        print(f"  Features:    Enhanced Stats (47-dim) - domain-specific features")
+        print(f"  SMOTE:       {'Enabled' if CLASS_WEIGHT_METHOD == 'smote' else 'Disabled'}")
+        print(f"  Cross-Val:   {CV_N_SPLITS}-fold" if CV_ENABLED else "  Cross-Val:   Disabled")
+        print(f"  Fusion:      {FUSION_TYPE}")
